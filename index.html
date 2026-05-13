@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-1: #0f172a;
+    --bg-2: #1e293b;
+    --card: #ffffff;
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --correct: #10b981;
+    --wrong: #ef4444;
+    --text: #1e293b;
+    --text-light: #64748b;
+    --border: #e2e8f0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: var(--text);
+  }
+
+  .container {
+    background: var(--card);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 720px;
+    overflow: hidden;
+  }
+
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 28px 32px;
+  }
+
+  .header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .header p {
+    opacity: 0.9;
+    font-size: 0.95rem;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+    margin-top: 16px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: white;
+    width: 0%;
+    transition: width 0.4s ease;
+    border-radius: 4px;
+  }
+
+  .progress-text {
+    font-size: 0.85rem;
+    margin-top: 8px;
+    opacity: 0.9;
+  }
+
+  .content {
+    padding: 36px 32px;
+  }
+
+  .vocab-word {
+    display: inline-block;
+    background: #eef2ff;
+    color: var(--primary-dark);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 20px;
+  }
+
+  .question {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    margin-bottom: 28px;
+    color: var(--text);
+  }
+
+  .blank {
+    display: inline-block;
+    min-width: 80px;
+    border-bottom: 2px solid var(--primary);
+    margin: 0 4px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option {
+    background: #f8fafc;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    text-align: left;
+    font-family: inherit;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .option:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: #eef2ff;
+    transform: translateX(4px);
+  }
+
+  .option-letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid var(--border);
+    font-weight: 600;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .option.correct {
+    background: #d1fae5;
+    border-color: var(--correct);
+    color: #065f46;
+  }
+
+  .option.correct .option-letter {
+    background: var(--correct);
+    border-color: var(--correct);
+    color: white;
+  }
+
+  .option.wrong {
+    background: #fee2e2;
+    border-color: var(--wrong);
+    color: #991b1b;
+  }
+
+  .option.wrong .option-letter {
+    background: var(--wrong);
+    border-color: var(--wrong);
+    color: white;
+  }
+
+  .option:disabled {
+    cursor: not-allowed;
+  }
+
+  .results {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .score-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+  }
+
+  .score-percent {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .score-fraction {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-top: 4px;
+  }
+
+  .grade-label {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .grade-message {
+    color: var(--text-light);
+    margin-bottom: 28px;
+  }
+
+  .review-section {
+    margin-top: 32px;
+    text-align: left;
+  }
+
+  .review-section h3 {
+    font-size: 1.15rem;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .review-item {
+    background: #f8fafc;
+    border-left: 4px solid var(--wrong);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+  }
+
+  .review-question {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  .review-word {
+    display: inline-block;
+    background: #eef2ff;
+    color: var(--primary-dark);
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .review-answer {
+    font-size: 0.9rem;
+    margin-top: 6px;
+  }
+
+  .review-answer.your-answer {
+    color: var(--wrong);
+  }
+
+  .review-answer.correct-answer {
+    color: var(--correct);
+    font-weight: 600;
+  }
+
+  .review-answer .label {
+    font-weight: 600;
+    color: var(--text-light);
+    margin-right: 6px;
+  }
+
+  .perfect-message {
+    background: #d1fae5;
+    border-left: 4px solid var(--correct);
+    color: #065f46;
+    padding: 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .restart-btn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: none;
+    padding: 14px 36px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: transform 0.2s;
+    font-family: inherit;
+  }
+
+  .restart-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+  }
+
+  .start-screen {
+    text-align: center;
+    padding: 20px 0;
+  }
+
+  .start-screen h2 {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
+
+  .start-screen p {
+    color: var(--text-light);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    background: #f1f5f9;
+    padding: 16px 24px;
+    border-radius: 12px;
+    min-width: 120px;
+  }
+
+  .stat-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 2px;
+  }
+
+  @media (max-width: 600px) {
+    .header { padding: 20px 24px; }
+    .content { padding: 24px 20px; }
+    .header h1 { font-size: 1.4rem; }
+    .question { font-size: 1.1rem; }
+    .option { padding: 14px 16px; font-size: 0.95rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>📚 Vocabulary Quiz</h1>
+    <p id="header-sub">Test your knowledge — 64 questions</p>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-text" id="progress-text">Ready to begin</div>
+  </div>
+
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+// Question data is Base64-encoded to prevent answers from being visible
+// in page source. Decoded at runtime only when a question is rendered.
+const ENCODED_BANK = [{"w":"Unadulterated","q":[{"s":"VGhlIGNoaWxkJ3MgbGF1Z2h0ZXIgd2FzIGEgbW9tZW50IG9mIF9fXyBqb3ksIHVudG91Y2hlZCBieSBhbnkgd29ycnkgb3IgY2FyZS4=","o":["aW1taW5lbnQ=","dW5hZHVsdGVyYXRlZA==","dHJlYWNoZXJvdXM=","Z2xhcmluZw=="],"c":"dW5hZHVsdGVyYXRlZA=="},{"s":"U2hlIG9mZmVyZWQgaGVyIF9fXyBvcGluaW9uLCBmcmVlIGZyb20gZmxhdHRlcnkgb3IgcG9saXRpY2FsIGNvbmNlcm4u","o":["dW5hZHVsdGVyYXRlZA==","YWZmbHVlbnQ=","dHJlYWNoZXJvdXM=","aW1taW5lbnQ="],"c":"dW5hZHVsdGVyYXRlZA=="}]},{"w":"Ample","q":[{"s":"VGhlcmUgd2FzIF9fXyB0aW1lIHRvIGZpbmlzaCB0aGUgcHJvamVjdCBiZWZvcmUgdGhlIGRlYWRsaW5lLg==","o":["YWxvb2Y=","c2FuY3RpbW9uaW91cw==","cHJvdmluY2lhbA==","YW1wbGU="],"c":"YW1wbGU="},{"s":"VGhlIG5ldyBhcGFydG1lbnQgaGFkIF9fXyBzdG9yYWdlIHNwYWNlIGZvciBhbGwgb2YgdGhlaXIgYmVsb25naW5ncy4=","o":["dHJlYWNoZXJvdXM=","YW1wbGU=","cHJvdmluY2lhbA==","Y29tcGxhY2VudA=="],"c":"YW1wbGU="}]},{"w":"Undulate","q":[{"s":"VGhlIGZpZWxkcyBvZiB3aGVhdCBiZWdhbiB0byBfX18gZ2VudGx5IGluIHRoZSBzdW1tZXIgYnJlZXplLg==","o":["cmVwdWRpYXRlZA==","YWRtb25pc2g=","cmVuZGVy","dW5kdWxhdGU="],"c":"dW5kdWxhdGU="},{"s":"V2Ugd2F0Y2hlZCB0aGUgc25ha2UncyBib2R5IF9fXyBzbW9vdGhseSBhY3Jvc3MgdGhlIGRlc2VydCBzYW5kLg==","o":["YWJzb2x2ZQ==","Y2hhc3Rpc2U=","Y29uY3Vy","dW5kdWxhdGU="],"c":"dW5kdWxhdGU="}]},{"w":"Epiphany","q":[{"s":"V2hpbGUgd2Fsa2luZyBob21lLCBzaGUgaGFkIGEgc3VkZGVuIF9fXyBhYm91dCB3aHkgaGVyIHBsYW4gaGFkIGJlZW4gZmFpbGluZy4=","o":["ZXBpcGhhbnk=","aW50cmljYWN5","Y291cA==","b3h5bW9yb24="],"c":"ZXBpcGhhbnk="},{"s":"VGhlIHNjaWVudGlzdCdzIF9fXyBjYW1lIGluIHRoZSBtaWRkbGUgb2YgdGhlIG5pZ2h0LCBmaW5hbGx5IHNvbHZpbmcgdGhlIGVxdWF0aW9uLg==","o":["aW1wdW5pdHk=","b3h5bW9yb24=","cmV0cmlidXRpb24=","ZXBpcGhhbnk="],"c":"ZXBpcGhhbnk="}]},{"w":"Absolve","q":[{"s":"VGhlIGp1ZGdlIGNob3NlIHRvIF9fXyB0aGUgZGVmZW5kYW50IG9mIGFueSB3cm9uZ2RvaW5nIGFmdGVyIG5ldyBldmlkZW5jZSBlbWVyZ2VkLg==","o":["YWJzb2x2ZQ==","Y2hhc3Rpc2U=","Y29uY3Vy","Y2Vuc3VyZQ=="],"c":"YWJzb2x2ZQ=="},{"s":"Q29uZmVzc2luZyB0aGUgdHJ1dGggc2VlbWVkIHRvIF9fXyBoaW0gb2YgdGhlIGd1aWx0IGhlIGhhZCBjYXJyaWVkIGZvciB5ZWFycy4=","o":["ZW1lcmdl","YWRtb25pc2g=","YWJzb2x2ZQ==","cmVuZGVy"],"c":"YWJzb2x2ZQ=="}]},{"w":"Impunity","q":[{"s":"VGhlIGNvcnJ1cHQgb2ZmaWNpYWwgYWN0ZWQgd2l0aCBfX18sIGtub3dpbmcgbm8gb25lIHdvdWxkIGRhcmUgaG9sZCBoaW0gYWNjb3VudGFibGUu","o":["bWF4aW0=","ZXVwaGVtaXNt","aW1wdW5pdHk=","cmVzb2x1dGlvbg=="],"c":"aW1wdW5pdHk="},{"s":"QnVsbGllcyBvZnRlbiBvcGVyYXRlIHdpdGggX19fIHdoZW4gYWR1bHRzIGZhaWwgdG8gc3RlcCBpbi4=","o":["ZXhpbGU=","cGFyYWxsZWxpc20=","ZmF0ZQ==","aW1wdW5pdHk="],"c":"aW1wdW5pdHk="}]},{"w":"Reproachful","q":[{"s":"U2hlIGdhdmUgaGltIGEgX19fIGxvb2sgYWZ0ZXIgaGUgaW50ZXJydXB0ZWQgaGVyIGZvciB0aGUgdGhpcmQgdGltZS4=","o":["bW9yb3Nl","c2FuY3RpbW9uaW91cw==","cmVwcm9hY2hmdWw=","Z2xhcmluZw=="],"c":"cmVwcm9hY2hmdWw="},{"s":"VGhlIGNvYWNoJ3MgX19fIHRvbmUgbWFkZSBpdCBjbGVhciBoZSB3YXMgZGlzYXBwb2ludGVkIGluIHRoZSB0ZWFtJ3MgZWZmb3J0Lg==","o":["c2FuY3RpbW9uaW91cw==","dmlnaWxhbnQ=","b2JzdGluYXRl","cmVwcm9hY2hmdWw="],"c":"cmVwcm9hY2hmdWw="}]},{"w":"Irrevocably","q":[{"s":"T25jZSB0aGUgbWVzc2FnZSB3YXMgc2VudCwgdGhlaXIgZnJpZW5kc2hpcCB3YXMgX19fIGNoYW5nZWQu","o":["aXJyZXZvY2FibHk=","ZW5taXR5","Y3Vyc29yeQ==","Y291cA=="],"c":"aXJyZXZvY2FibHk="},{"s":"VGhlIGRlY2lzaW9uIF9fXyBhbHRlcmVkIHRoZSBjb3Vyc2Ugb2YgaGlzIGNhcmVlci4=","o":["YWxsdXNpb24=","cmV2ZXJlbmNl","aXJyZXZvY2FibHk=","Y2Vuc3VyZQ=="],"c":"aXJyZXZvY2FibHk="}]},{"w":"Foreboding","q":[{"s":"QSBzZW5zZSBvZiBfX18gZmlsbGVkIHRoZSByb29tIGFzIHRoZSBzdG9ybSBjbG91ZHMgZ2F0aGVyZWQgb3V0c2lkZS4=","o":["aW50cmljYWN5","Zm9yZWJvZGluZw==","cmV2ZXJlbmNl","YWxsdXNpb24="],"c":"Zm9yZWJvZGluZw=="},{"s":"VGhlIGRhcmssIGVtcHR5IGhhbGx3YXkgZ2F2ZSBoZXIgYSBfX18gZmVlbGluZyBzaGUgY291bGRuJ3Qgc2hha2Uu","o":["Zm9yZWJvZGluZw==","YWxsdXNpb24=","ZXBpcGhhbnk=","YW5hcGhvcmE="],"c":"Zm9yZWJvZGluZw=="}]},{"w":"Catharsis","q":[{"s":"V3JpdGluZyBpbiBoZXIgam91cm5hbCBlYWNoIG5pZ2h0IHByb3ZpZGVkIHRoZSBlbW90aW9uYWwgX19fIHNoZSBuZWVkZWQu","o":["cmVzb2x1dGlvbg==","aW5kaWduYXRpb24=","cmV0cmlidXRpb24=","Y2F0aGFyc2lz"],"c":"Y2F0aGFyc2lz"},{"s":"VGhlIGF1ZGllbmNlIGV4cGVyaWVuY2VkIGEgcG93ZXJmdWwgX19fIGFzIHRoZSB0cmFnZWR5IHJlYWNoZWQgaXRzIGNvbmNsdXNpb24u","o":["bWF4aW0=","Y2F0aGFyc2lz","ZXBpc3Ryb3BoZQ==","Zm9yZWJvZGluZw=="],"c":"Y2F0aGFyc2lz"}]},{"w":"Coup","q":[{"s":"VGhlIGdlbmVyYWwncyBibG9vZGxlc3MgX19fIHJlcGxhY2VkIHRoZSBnb3Zlcm5tZW50IG92ZXJuaWdodC4=","o":["ZWRpY3Q=","Y291cA==","aHVicmlz","cmV2ZXJlbmNl"],"c":"Y291cA=="},{"s":"TGFuZGluZyB0aGUgY2VsZWJyaXR5IGludGVydmlldyB3YXMgY29uc2lkZXJlZCBhIG1ham9yIGpvdXJuYWxpc3RpYyBfX18u","o":["Y291cA==","YW5hcGhvcmE=","Y2F0aGFyc2lz","aW5kaWduYXRpb24="],"c":"Y291cA=="}]},{"w":"Nuance","q":[{"s":"QSBza2lsbGVkIHRyYW5zbGF0b3IgY2FwdHVyZXMgZXZlcnkgX19fIG9mIG1lYW5pbmcgaW4gdGhlIG9yaWdpbmFsIHRleHQu","o":["bnVhbmNl","anV4dGFwb3NpdGlvbg==","ZXVwaGVtaXNt","ZmF0ZQ=="],"c":"bnVhbmNl"},{"s":"VGhlIHBhaW50aW5nJ3MgYmVhdXR5IGxpZXMgaW4gdGhlIHN1YnRsZSBfX18gb2YgY29sb3IgYW5kIHNoYWRvdy4=","o":["ZXBpc3Ryb3BoZQ==","YW5hcGhvcmE=","bnVhbmNl","c292ZXJlaWdudHk="],"c":"bnVhbmNl"}]},{"w":"Trepidation","q":[{"s":"U2hlIGFwcHJvYWNoZWQgdGhlIHByaW5jaXBhbCdzIG9mZmljZSB3aXRoIGdyZWF0IF9fXywgdW5zdXJlIG9mIHdoYXQgYXdhaXRlZCBoZXIu","o":["dHJlcGlkYXRpb24=","ZmF0ZQ==","ZWRpY3Q=","bWF4aW0="],"c":"dHJlcGlkYXRpb24="},{"s":"SGUgc3RlcHBlZCBvbnRvIHRoZSBzdGFnZSB3aXRoIG9idmlvdXMgX19fLCBoaXMgaGFuZHMgc2hha2luZyBzbGlnaHRseS4=","o":["dHJlcGlkYXRpb24=","YWZmbGljdGlvbg==","YW5hcGhvcmE=","aW5kaWduYXRpb24="],"c":"dHJlcGlkYXRpb24="}]},{"w":"Morose","q":[{"s":"RXZlciBzaW5jZSBsb3NpbmcgdGhlIGNoYW1waW9uc2hpcCwgaGUgaGFkIGJlZW4gX19fIGFuZCB3aXRoZHJhd24u","o":["c29yZGlk","dHJlYWNoZXJvdXM=","bW9yb3Nl","cHJvdmluY2lhbA=="],"c":"bW9yb3Nl"},{"s":"SGVyIF9fXyBleHByZXNzaW9uIHRvbGQgZXZlcnlvbmUgdGhlIG5ld3MgaGFkIG5vdCBiZWVuIGdvb2Qu","o":["dW5hZHVsdGVyYXRlZA==","bW9yb3Nl","cHJvdmluY2lhbA==","dHJlYWNoZXJvdXM="],"c":"bW9yb3Nl"}]},{"w":"Imminent","q":[{"s":"V2l0aCBkYXJrIGNsb3VkcyByb2xsaW5nIGluLCB0aGUgc3Rvcm0gc2VlbWVkIF9fXy4=","o":["aW1taW5lbnQ=","YWZmbHVlbnQ=","YW1wbGU=","bHVtaW5vdXM="],"c":"aW1taW5lbnQ="},{"s":"VGhlIENFTyB3YXJuZWQgZW1wbG95ZWVzIG9mIF9fXyBjaGFuZ2VzIHRvIHRoZSBjb21wYW55J3Mgc3RydWN0dXJlLg==","o":["dHJlYWNoZXJvdXM=","YWN1dGU=","bW9yb3Nl","aW1taW5lbnQ="],"c":"aW1taW5lbnQ="}]},{"w":"Luminous","q":[{"s":"VGhlIGZ1bGwgbW9vbiBjYXN0IGEgX19fIGdsb3cgYWNyb3NzIHRoZSBsYWtlLg==","o":["c2FuY3RpbW9uaW91cw==","aW1taW5lbnQ=","c29yZGlk","bHVtaW5vdXM="],"c":"bHVtaW5vdXM="},{"s":"SGVyIF9fXyBzbWlsZSBsaXQgdXAgdGhlIGVudGlyZSByb29tLg==","o":["YWZmbHVlbnQ=","YWxvb2Y=","bHVtaW5vdXM=","bW9yb3Nl"],"c":"bHVtaW5vdXM="}]},{"w":"Demeanor","q":[{"s":"RGVzcGl0ZSB0aGUgY2hhb3MgYXJvdW5kIGhpbSwgaGlzIGNhbG0gX19fIG5ldmVyIHdhdmVyZWQu","o":["emVhbA==","YWxsdXNpb24=","ZWRpY3Q=","ZGVtZWFub3I="],"c":"ZGVtZWFub3I="},{"s":"VGhlIGludGVydmlld2VyJ3MgZnJpZW5kbHkgX19fIGhlbHBlZCB0aGUgY2FuZGlkYXRlIHJlbGF4Lg==","o":["aHVicmlz","ZGVtZWFub3I=","bWF4aW0=","YWZmbGljdGlvbg=="],"c":"ZGVtZWFub3I="}]},{"w":"Chastise","q":[{"s":"VGhlIHRlYWNoZXIgaGFkIHRvIF9fXyB0aGUgc3R1ZGVudHMgZm9yIHRhbGtpbmcgZHVyaW5nIHRoZSBleGFtLg==","o":["cmVwdWRpYXRlZA==","Y2hhc3Rpc2U=","ZXhwb3VuZA==","ZW1lcmdl"],"c":"Y2hhc3Rpc2U="},{"s":"TXkgZ3JhbmRtb3RoZXIgd291bGQgZ2VudGx5IF9fXyBtZSB3aGVuZXZlciBJIGZvcmdvdCBteSBtYW5uZXJzLg==","o":["cmVwdWRpYXRlZA==","Y29uY3Vy","cmVuZGVy","Y2hhc3Rpc2U="],"c":"Y2hhc3Rpc2U="}]},{"w":"Affable","q":[{"s":"VGhlIG5ldyBuZWlnaGJvciB3YXMgc28gX19fIHRoYXQgZXZlcnlvbmUgb24gdGhlIGJsb2NrIGluc3RhbnRseSBsaWtlZCBoaW0u","o":["YWZmYWJsZQ==","Y3Vyc29yeQ==","YWN1dGU=","b2JzdGluYXRl"],"c":"YWZmYWJsZQ=="},{"s":"SGVyIF9fXyBtYW5uZXIgbWFkZSBjdXN0b21lcnMgZmVlbCB3ZWxjb21lIHRoZSBtb21lbnQgdGhleSBlbnRlcmVkLg==","o":["dW5zY3J1cHVsb3Vz","YW1wbGU=","YWZmYWJsZQ==","dW5hZHVsdGVyYXRlZA=="],"c":"YWZmYWJsZQ=="}]},{"w":"Cursory","q":[{"s":"SGUgZ2F2ZSB0aGUgcmVwb3J0IG9ubHkgYSBfX18gZ2xhbmNlIGJlZm9yZSBzaWduaW5nIGl0Lg==","o":["Y3Vyc29yeQ==","c29yZGlk","dmlnaWxhbnQ=","aW1taW5lbnQ="],"c":"Y3Vyc29yeQ=="},{"s":"QSBfX18gaW5zcGVjdGlvbiBvZiB0aGUgY2FyIG1pc3NlZCB0aGUgc2VyaW91cyBkYW1hZ2UgdW5kZXJuZWF0aC4=","o":["YWZmYWJsZQ==","Y3Vyc29yeQ==","dHJlYWNoZXJvdXM=","dml2YWNpb3Vz"],"c":"Y3Vyc29yeQ=="}]},{"w":"Atone","q":[{"s":"SGUgc3BlbnQgeWVhcnMgdHJ5aW5nIHRvIF9fXyBmb3IgdGhlIG1pc3Rha2VzIG9mIGhpcyB5b3V0aC4=","o":["ZW1lcmdl","Y29uY3Vy","YXRvbmU=","ZXhwb3VuZA=="],"c":"YXRvbmU="},{"s":"U2hlIHZvbHVudGVlcmVkIGF0IHRoZSBzaGVsdGVyIHRvIF9fXyBmb3IgaGVyIHBhc3Qgc2VsZmlzaG5lc3Mu","o":["YXRvbmU=","Y29uY3Vy","cmVwdWRpYXRlZA==","YWRtb25pc2g="],"c":"YXRvbmU="}]},{"w":"Affluent","q":[{"s":"VGhleSBtb3ZlZCB0byBhbiBfX18gbmVpZ2hib3Job29kIHdpdGggbWFuaWN1cmVkIGxhd25zIGFuZCBsdXh1cnkgY2Fycy4=","o":["cmVwcm9hY2hmdWw=","YWZmbHVlbnQ=","cHJvdmluY2lhbA==","YWxvb2Y="],"c":"YWZmbHVlbnQ="},{"s":"RGVzcGl0ZSBoZXIgX19fIHVwYnJpbmdpbmcsIHNoZSBjaG9zZSBhIG1vZGVzdCBsaWZlc3R5bGUu","o":["ZmxlZXRpbmc=","YWZmbHVlbnQ=","c29yZGlk","Z2xhcmluZw=="],"c":"YWZmbHVlbnQ="}]},{"w":"Unscrupulous","q":[{"s":"VGhlIF9fXyBzYWxlc21hbiBsaWVkIGFib3V0IHRoZSB3YXJyYW50eSB0byBjbG9zZSB0aGUgZGVhbC4=","o":["dHJlYWNoZXJvdXM=","YWxvb2Y=","dW5zY3J1cHVsb3Vz","bW9yb3Nl"],"c":"dW5zY3J1cHVsb3Vz"},{"s":"SW52ZXN0b3JzIGxvc3QgZXZlcnl0aGluZyB0byBhbiBfX18gYnJva2VyIHdobyBmYWxzaWZpZWQgdGhlIHJlY29yZHMu","o":["YWxvb2Y=","bHVtaW5vdXM=","YWZmbHVlbnQ=","dW5zY3J1cHVsb3Vz"],"c":"dW5zY3J1cHVsb3Vz"}]},{"w":"Render","q":[{"s":"VGhlIGluanVyeSB3b3VsZCBfX18gaGltIHVuYWJsZSB0byBwbGF5IGZvciB0aGUgcmVzdCBvZiB0aGUgc2Vhc29uLg==","o":["YWJzb2x2ZQ==","cmVuZGVy","Y2Vuc3VyZQ==","YWRtb25pc2g="],"c":"cmVuZGVy"},{"s":"VGhlIGJsaXp6YXJkIHdvdWxkIF9fXyB0aGUgcm9hZHMgY29tcGxldGVseSBpbXBhc3NhYmxlLg==","o":["ZW1lcmdl","cmVuZGVy","YWRtb25pc2g=","ZXhwb3VuZA=="],"c":"cmVuZGVy"}]},{"w":"Disdain","q":[{"s":"U2hlIGxvb2tlZCBhdCB0aGUgY2hlYXAgaW1pdGF0aW9uIHdpdGggb2J2aW91cyBfX18u","o":["dHJlcGlkYXRpb24=","cGFyYWxsZWxpc20=","ZGlzZGFpbg==","Y2F0aGFyc2lz"],"c":"ZGlzZGFpbg=="},{"s":"SGlzIF9fXyBmb3Igc21hbGwgdGFsayBtYWRlIGhpbSBzZWVtIHVuZnJpZW5kbHkgYXQgcGFydGllcy4=","o":["YW5hcGhvcmE=","aW5kaWduYXRpb24=","ZGlzZGFpbg==","Y291cA=="],"c":"ZGlzZGFpbg=="}]},{"w":"Affliction","q":[{"s":"VGhlIHJhcmUgX19fIGxlZnQgaGVyIGJlZHJpZGRlbiBmb3IgbW9zdCBvZiB0aGUgd2ludGVyLg==","o":["YWZmbGljdGlvbg==","ZXBpcGhhbnk=","cmV0cmlidXRpb24=","Zm9yZWJvZGluZw=="],"c":"YWZmbGljdGlvbg=="},{"s":"TG9uZWxpbmVzcyB3YXMgYSBxdWlldCBfX18gdGhhdCBmb2xsb3dlZCBoaW0gaW50byBvbGQgYWdlLg==","o":["cmV2ZXJlbmNl","cmV0cmlidXRpb24=","ZXBpcGhhbnk=","YWZmbGljdGlvbg=="],"c":"YWZmbGljdGlvbg=="}]},{"w":"Obstinate","q":[{"s":"VGhlIF9fXyBtdWxlIHJlZnVzZWQgdG8gbW92ZSBubyBtYXR0ZXIgaG93IGhhcmQgd2UgcHVsbGVkLg==","o":["dmlnaWxhbnQ=","cmVwcm9hY2hmdWw=","b2JzdGluYXRl","YWZmYWJsZQ=="],"c":"b2JzdGluYXRl"},{"s":"SGVyIF9fXyByZWZ1c2FsIHRvIGNvbXByb21pc2UgZXZlbnR1YWxseSBjb3N0IGhlciB0aGUgZGVhbC4=","o":["b2JzdGluYXRl","Y3Vyc29yeQ==","YW1wbGU=","bW9yb3Nl"],"c":"b2JzdGluYXRl"}]},{"w":"Glaring","q":[{"s":"VGhlcmUgd2FzIGEgX19fIGVycm9yIG9uIHRoZSBmaXJzdCBwYWdlIG9mIHRoZSByZXBvcnQu","o":["dmlnaWxhbnQ=","ZmxlZXRpbmc=","Z2xhcmluZw==","YWZmbHVlbnQ="],"c":"Z2xhcmluZw=="},{"s":"VGhlIF9fXyBvbWlzc2lvbiBpbiBoaXMgdGVzdGltb255IGNhdWdodCB0aGUgbGF3eWVyJ3MgYXR0ZW50aW9uIGltbWVkaWF0ZWx5Lg==","o":["b2JzdGluYXRl","dW5hZHVsdGVyYXRlZA==","aW1taW5lbnQ=","Z2xhcmluZw=="],"c":"Z2xhcmluZw=="}]},{"w":"Intricacy","q":[{"s":"VGhlIF9fXyBvZiB0aGUgd2F0Y2gncyBpbm5lciB3b3JraW5ncyBpbXByZXNzZWQgZXZlbiBzZWFzb25lZCBlbmdpbmVlcnMu","o":["emVhbA==","aW50cmljYWN5","anV4dGFwb3NpdGlvbg==","cmV2ZXJlbmNl"],"c":"aW50cmljYWN5"},{"s":"U2hlIG1hcnZlbGVkIGF0IHRoZSBfX18gb2YgdGhlIGhhbmQtd292ZW4gdGFwZXN0cnku","o":["aW50cmljYWN5","ZWRpY3Q=","YWxsdXNpb24=","YW5hcGhvcmE="],"c":"aW50cmljYWN5"}]},{"w":"Fleeting","q":[{"s":"Q2hpbGRob29kIGlzIF9fXzsgb25lIGRheSB5b3UgYmxpbmsgYW5kIGl0J3MgZ29uZS4=","o":["ZmxlZXRpbmc=","YWZmbHVlbnQ=","aW1taW5lbnQ=","cHJvdmluY2lhbA=="],"c":"ZmxlZXRpbmc="},{"s":"U2hlIGNhdWdodCBhIF9fXyBnbGltcHNlIG9mIGhpbSB0aHJvdWdoIHRoZSBjcm93ZCBiZWZvcmUgaGUgZGlzYXBwZWFyZWQu","o":["Y29tcGxhY2VudA==","ZmxlZXRpbmc=","dHJlYWNoZXJvdXM=","aW1taW5lbnQ="],"c":"ZmxlZXRpbmc="}]},{"w":"Enmity","q":[{"s":"VGhlIF9fXyBiZXR3ZWVuIHRoZSB0d28gZmFtaWxpZXMgd2VudCBiYWNrIGdlbmVyYXRpb25zLg==","o":["ZXBpc3Ryb3BoZQ==","ZW5taXR5","YWxsdXNpb24=","c292ZXJlaWdudHk="],"c":"ZW5taXR5"},{"s":"VGhlcmUgd2FzIGNsZWFyIF9fXyBpbiBoaXMgZXllcyB3aGVuZXZlciBoaXMgcml2YWwgZW50ZXJlZCB0aGUgcm9vbS4=","o":["ZW5taXR5","Zm9yZWJvZGluZw==","ZmF0ZQ==","YWZmbGljdGlvbg=="],"c":"ZW5taXR5"}]},{"w":"Vivacious","q":[{"s":"SGVyIF9fXyBwZXJzb25hbGl0eSBtYWRlIGhlciB0aGUgY2VudGVyIG9mIGV2ZXJ5IGdhdGhlcmluZy4=","o":["YWN1dGU=","bHVtaW5vdXM=","dml2YWNpb3Vz","aW1taW5lbnQ="],"c":"dml2YWNpb3Vz"},{"s":"VGhlIF9fXyBob3N0IGtlcHQgdGhlIGNvbnZlcnNhdGlvbiBmbG93aW5nIGFsbCBldmVuaW5nLg==","o":["cHJvdmluY2lhbA==","dml2YWNpb3Vz","dW5zY3J1cHVsb3Vz","dHJlYWNoZXJvdXM="],"c":"dml2YWNpb3Vz"}]},{"w":"Expound","q":[{"s":"VGhlIHByb2Zlc3NvciBiZWdhbiB0byBfX18gb24gdGhlIHRoZW9yeSBmb3Igb3ZlciBhbiBob3VyLg==","o":["ZXhwb3VuZA==","cmVwdWRpYXRlZA==","Y2Vuc3VyZQ==","Y2hhc3Rpc2U="],"c":"ZXhwb3VuZA=="},{"s":"SGUgYXNrZWQgaGVyIHRvIF9fXyBmdXJ0aGVyIG9uIGhlciBwcm9wb3NhbCBkdXJpbmcgdGhlIG1lZXRpbmcu","o":["Y2Vuc3VyZQ==","YXRvbmU=","Y29uY3Vy","ZXhwb3VuZA=="],"c":"ZXhwb3VuZA=="}]},{"w":"Resolution","q":[{"s":"U2hlIG1hZGUgYSBOZXcgWWVhcidzIF9fXyB0byBleGVyY2lzZSB0aHJlZSB0aW1lcyBhIHdlZWsu","o":["Y2F0aGFyc2lz","cmVzb2x1dGlvbg==","ZXBpcGhhbnk=","bWF4aW0="],"c":"cmVzb2x1dGlvbg=="},{"s":"RGVzcGl0ZSB0aGUgc2V0YmFja3MsIGhpcyBfX18gdG8gZmluaXNoIHRoZSBtYXJhdGhvbiBuZXZlciB3YXZlcmVkLg==","o":["aW1wdW5pdHk=","ZXBpc3Ryb3BoZQ==","cmVzb2x1dGlvbg==","Zm9yZWJvZGluZw=="],"c":"cmVzb2x1dGlvbg=="}]},{"w":"Acute","q":[{"s":"SGUgZmVsdCBhbiBfX18gcGFpbiBpbiBoaXMgc2lkZSBhZnRlciB0aGUgZmFsbC4=","o":["dW5hZHVsdGVyYXRlZA==","YWN1dGU=","c2FuY3RpbW9uaW91cw==","Z2xhcmluZw=="],"c":"YWN1dGU="},{"s":"SGVyIF9fXyBzZW5zZSBvZiBzbWVsbCBoZWxwZWQgaGVyIGlkZW50aWZ5IHRoZSBzcGljZSBpbW1lZGlhdGVseS4=","o":["YWN1dGU=","c29yZGlk","dW5hZHVsdGVyYXRlZA==","dHJlYWNoZXJvdXM="],"c":"YWN1dGU="}]},{"w":"Maxim","q":[{"s":"SGUgbGl2ZWQgYnkgdGhlIF9fXyB0aGF0IGhvbmVzdHkgaXMgYWx3YXlzIHRoZSBiZXN0IHBvbGljeS4=","o":["emVhbA==","bWF4aW0=","aW50cmljYWN5","YWZmbGljdGlvbg=="],"c":"bWF4aW0="},{"s":"VGhlIG9sZCBfX18gImhhc3RlIG1ha2VzIHdhc3RlIiBwcm92ZWQgdHJ1ZSBvbmNlIGFnYWluLg==","o":["bWF4aW0=","cmV0cmlidXRpb24=","Y2F0aGFyc2lz","aW50cmljYWN5"],"c":"bWF4aW0="}]},{"w":"Emerge","q":[{"s":"QWZ0ZXIgaG91cnMgb2Ygc2VhcmNoaW5nLCBuZXcgY2x1ZXMgYmVnYW4gdG8gX19fIGZyb20gdGhlIGV2aWRlbmNlLg==","o":["Y2hhc3Rpc2U=","YWRtb25pc2g=","ZW1lcmdl","cmVwdWRpYXRlZA=="],"c":"ZW1lcmdl"},{"s":"VGhlIGhpa2VycyB3ZXJlIHJlbGlldmVkIHRvIF9fXyBmcm9tIHRoZSBkZW5zZSBmb3Jlc3QganVzdCBiZWZvcmUgc3Vuc2V0Lg==","o":["ZW1lcmdl","Y29uY3Vy","YXRvbmU=","Y2hhc3Rpc2U="],"c":"ZW1lcmdl"}]},{"w":"Aloof","q":[{"s":"VGhlIG5ldyBzdHVkZW50IHJlbWFpbmVkIF9fXywgc2l0dGluZyBhbG9uZSBhdCBsdW5jaCBldmVyeSBkYXku","o":["b2JzdGluYXRl","dml2YWNpb3Vz","YWxvb2Y=","Y29tcGxhY2VudA=="],"c":"YWxvb2Y="},{"s":"SGUga2VwdCBfX18gZnJvbSBvZmZpY2UgZ29zc2lwIGFuZCBwb2xpdGljcy4=","o":["Y29tcGxhY2VudA==","Y3Vyc29yeQ==","YWxvb2Y=","YWN1dGU="],"c":"YWxvb2Y="}]},{"w":"Sordid","q":[{"s":"VGhlIHRhYmxvaWQgcHVibGlzaGVkIGV2ZXJ5IF9fXyBkZXRhaWwgb2YgdGhlIHNjYW5kYWwu","o":["ZmxlZXRpbmc=","cmVwcm9hY2hmdWw=","c29yZGlk","dmlnaWxhbnQ="],"c":"c29yZGlk"},{"s":"QmVoaW5kIHRoZSBwb2xpc2hlZCBpbWFnZSBsYXkgYSBfX18gaGlzdG9yeSBvZiBjb3JydXB0aW9uLg==","o":["c29yZGlk","YWZmYWJsZQ==","YW1wbGU=","bHVtaW5vdXM="],"c":"c29yZGlk"}]},{"w":"Indignation","q":[{"s":"U2hlIGZpbGxlZCB3aXRoIF9fXyB3aGVuIHNoZSBoZWFyZCBob3cgdGhlIGVtcGxveWVlcyBoYWQgYmVlbiB0cmVhdGVkLg==","o":["aW1wdW5pdHk=","aHVicmlz","aW5kaWduYXRpb24=","ZXhpbGU="],"c":"aW5kaWduYXRpb24="},{"s":"SGlzIF9fXyBhdCB0aGUgdW5mYWlyIHJ1bGluZyB3YXMgdmlzaWJsZSB0byBldmVyeW9uZSBpbiB0aGUgY291cnRyb29tLg==","o":["cmV0cmlidXRpb24=","aW5kaWduYXRpb24=","aW1wdW5pdHk=","b3h5bW9yb24="],"c":"aW5kaWduYXRpb24="}]},{"w":"Retribution","q":[{"s":"VGhlIHZpbGxhZ2VycyBzb3VnaHQgX19fIGZvciB0aGUgZGVzdHJ1Y3Rpb24gY2F1c2VkIGJ5IHRoZSByYWlkZXJzLg==","o":["ZXhpbGU=","cmV0cmlidXRpb24=","YW5hcGhvcmE=","anV4dGFwb3NpdGlvbg=="],"c":"cmV0cmlidXRpb24="},{"s":"SGUgYmVsaWV2ZWQgdGhlIHN0b3JtIHdhcyBkaXZpbmUgX19fIGZvciB0aGUgdG93bidzIHdpY2tlZG5lc3Mu","o":["cmV0cmlidXRpb24=","ZWRpY3Q=","YWxsdXNpb24=","dHJlcGlkYXRpb24="],"c":"cmV0cmlidXRpb24="}]},{"w":"Treacherous","q":[{"s":"VGhlIG1vdW50YWluIHBhc3MgYmVjYW1lIF9fXyBhZnRlciB0aGUgaWNlIHN0b3JtLg==","o":["dW5hZHVsdGVyYXRlZA==","c29yZGlk","dHJlYWNoZXJvdXM=","aW1taW5lbnQ="],"c":"dHJlYWNoZXJvdXM="},{"s":"SGUgd2FzIGJldHJheWVkIGJ5IGEgX19fIGZyaWVuZCBoZSBoYWQgdHJ1c3RlZCBmb3IgeWVhcnMu","o":["YWZmYWJsZQ==","c29yZGlk","aW1taW5lbnQ=","dHJlYWNoZXJvdXM="],"c":"dHJlYWNoZXJvdXM="}]},{"w":"Censure","q":[{"s":"VGhlIHNlbmF0b3IgZmFjZWQgcHVibGljIF9fXyBmb3IgaGlzIGluYXBwcm9wcmlhdGUgY29tbWVudHMu","o":["YWJzb2x2ZQ==","YXRvbmU=","Y2Vuc3VyZQ==","ZW1lcmdl"],"c":"Y2Vuc3VyZQ=="},{"s":"VGhlIGNvbW1pdHRlZSB2b3RlZCB0byBmb3JtYWxseSBfX18gdGhlIG9mZmljaWFsIGZvciBtaXNjb25kdWN0Lg==","o":["cmVuZGVy","Y2Vuc3VyZQ==","YXRvbmU=","Y29uY3Vy"],"c":"Y2Vuc3VyZQ=="}]},{"w":"Edict","q":[{"s":"VGhlIGtpbmcgaXNzdWVkIGFuIF9fXyBiYW5uaW5nIGFsbCBmb3JlaWduIHRyYWRlLg==","o":["YW5hcGhvcmE=","aHVicmlz","ZWRpY3Q=","bWF4aW0="],"c":"ZWRpY3Q="},{"s":"Qnkgcm95YWwgX19fLCB0aGUgZmVzdGl2YWwgd2FzIHRvIGJlIGhlbGQgZXZlcnkgc3ByaW5nLg==","o":["YWZmbGljdGlvbg==","cmVzb2x1dGlvbg==","ZWRpY3Q=","Zm9yZWJvZGluZw=="],"c":"ZWRpY3Q="}]},{"w":"Fate","q":[{"s":"U2hlIGJlbGlldmVkIGl0IHdhcyBfX18gdGhhdCBicm91Z2h0IHRoZW0gdG9nZXRoZXIgYXQgdGhlIGFpcnBvcnQu","o":["ZGlzZGFpbg==","ZmF0ZQ==","bnVhbmNl","ZW5taXR5"],"c":"ZmF0ZQ=="},{"s":"VGhlIGhlcm8gY291bGQgbm90IGVzY2FwZSB0aGUgX19fIHRoYXQgaGFkIGJlZW4gd3JpdHRlbiBmb3IgaGltLg==","o":["anV4dGFwb3NpdGlvbg==","ZmF0ZQ==","cmV0cmlidXRpb24=","aW5kaWduYXRpb24="],"c":"ZmF0ZQ=="}]},{"w":"Hubris","q":[{"s":"SGlzIF9fXyBsZWQgaGltIHRvIGlnbm9yZSB0aGUgd2FybmluZ3MgYW5kIGF0dGVtcHQgdGhlIGNsaW1iIGFueXdheS4=","o":["aHVicmlz","b3h5bW9yb24=","bWF4aW0=","YWZmbGljdGlvbg=="],"c":"aHVicmlz"},{"s":"TWFueSBHcmVlayB0cmFnZWRpZXMgY2VudGVyIG9uIGEgaGVybyBicm91Z2h0IGRvd24gYnkgaGlzIG93biBfX18u","o":["aHVicmlz","aW50cmljYWN5","aW5kaWduYXRpb24=","bnVhbmNl"],"c":"aHVicmlz"}]},{"w":"Reverence","q":[{"s":"VGhlIHBpbGdyaW1zIGFwcHJvYWNoZWQgdGhlIHNocmluZSB3aXRoIGRlZXAgX19fLg==","o":["cmV2ZXJlbmNl","cmV0cmlidXRpb24=","ZWRpY3Q=","aW5kaWduYXRpb24="],"c":"cmV2ZXJlbmNl"},{"s":"U2hlIHNwb2tlIG9mIGhlciBsYXRlIG1lbnRvciB3aXRoIHF1aWV0IF9fXy4=","o":["ZXVwaGVtaXNt","cmV2ZXJlbmNl","Y2F0aGFyc2lz","ZWRpY3Q="],"c":"cmV2ZXJlbmNl"}]},{"w":"Sovereignty","q":[{"s":"VGhlIHNtYWxsIG5hdGlvbiBmb3VnaHQgYSBsb25nIHdhciB0byBwcmVzZXJ2ZSBpdHMgX19fLg==","o":["ZWRpY3Q=","ZXVwaGVtaXNt","c292ZXJlaWdudHk=","ZGlzZGFpbg=="],"c":"c292ZXJlaWdudHk="},{"s":"VGhlIHRyZWF0eSByZWNvZ25pemVkIHRoZSB0cmliZSdzIF9fXyBvdmVyIHRoZSBhbmNlc3RyYWwgbGFuZHMu","o":["c292ZXJlaWdudHk=","Y2F0aGFyc2lz","b3h5bW9yb24=","YW5hcGhvcmE="],"c":"c292ZXJlaWdudHk="}]},{"w":"Exile","q":[{"s":"VGhlIGRldGhyb25lZCBraW5nIHdhcyBzZW50IGludG8gX19fIG9uIGEgZGlzdGFudCBpc2xhbmQu","o":["ZGVtZWFub3I=","dHJlcGlkYXRpb24=","ZXhpbGU=","ZXBpcGhhbnk="],"c":"ZXhpbGU="},{"s":"QWZ0ZXIgeWVhcnMgb2YgX19fLCB0aGUgcG9ldCB3YXMgZmluYWxseSBhbGxvd2VkIHRvIHJldHVybiBob21lLg==","o":["ZXhpbGU=","Zm9yZWJvZGluZw==","aW5kaWduYXRpb24=","ZXBpc3Ryb3BoZQ=="],"c":"ZXhpbGU="}]},{"w":"Vigilant","q":[{"s":"UGFyZW50cyBtdXN0IHJlbWFpbiBfX18gd2hlbiB0aGVpciBjaGlsZHJlbiBhcmUgcGxheWluZyBuZWFyIHdhdGVyLg==","o":["c2FuY3RpbW9uaW91cw==","dml2YWNpb3Vz","dmlnaWxhbnQ=","b2JzdGluYXRl"],"c":"dmlnaWxhbnQ="},{"s":"VGhlIGd1YXJkIHN0YXllZCBfX18gdGhyb3VnaG91dCB0aGUgbG9uZyBuaWdodCBzaGlmdC4=","o":["bHVtaW5vdXM=","dHJlYWNoZXJvdXM=","dmlnaWxhbnQ=","dW5hZHVsdGVyYXRlZA=="],"c":"dmlnaWxhbnQ="}]},{"w":"Zeal","q":[{"s":"U2hlIHRhY2tsZWQgaGVyIG5ldyBqb2Igd2l0aCB0aGUgX19fIG9mIHNvbWVvbmUgd2hvIGhhZCBmb3VuZCBoZXIgY2FsbGluZy4=","o":["ZW5taXR5","emVhbA==","YW5hcGhvcmE=","bnVhbmNl"],"c":"emVhbA=="},{"s":"SGlzIF9fXyBmb3IgZW52aXJvbm1lbnRhbCBjYXVzZXMgaW5zcGlyZWQgb3RoZXJzIHRvIHZvbHVudGVlci4=","o":["emVhbA==","ZXhpbGU=","ZW5taXR5","ZmF0ZQ=="],"c":"emVhbA=="}]},{"w":"Provincial","q":[{"s":"SGlzIF9fXyBhdHRpdHVkZXMgc2VlbWVkIG91dCBvZiBwbGFjZSBpbiB0aGUgY29zbW9wb2xpdGFuIGNpdHku","o":["YWZmYWJsZQ==","cHJvdmluY2lhbA==","dmlnaWxhbnQ=","dHJlYWNoZXJvdXM="],"c":"cHJvdmluY2lhbA=="},{"s":"U2hlIGZvdW5kIHRoZSB0b3duIGNoYXJtaW5nIGJ1dCBhIGJpdCB0b28gX19fIGZvciBoZXIgdGFzdGUu","o":["bW9yb3Nl","YWZmbHVlbnQ=","Y29tcGxhY2VudA==","cHJvdmluY2lhbA=="],"c":"cHJvdmluY2lhbA=="}]},{"w":"Admonish","q":[{"s":"VGhlIGNvYWNoIGhhZCB0byBfX18gdGhlIHRlYW0gZm9yIGFycml2aW5nIGxhdGUgdG8gcHJhY3RpY2Uu","o":["YWRtb25pc2g=","cmVuZGVy","YXRvbmU=","ZXhwb3VuZA=="],"c":"YWRtb25pc2g="},{"s":"U2hlIHdvdWxkIGdlbnRseSBfX18gaGVyIGNoaWxkcmVuIHdoZW4gdGhleSBmb3Jnb3QgdG8gc2F5IHRoYW5rIHlvdS4=","o":["ZXhwb3VuZA==","cmVwdWRpYXRlZA==","ZW1lcmdl","YWRtb25pc2g="],"c":"YWRtb25pc2g="}]},{"w":"Complacent","q":[{"s":"QWZ0ZXIgd2lubmluZyB0aGUgZmlyc3QgZmV3IGdhbWVzLCB0aGUgdGVhbSBiZWNhbWUgX19fIGFuZCBzdGFydGVkIGxvc2luZy4=","o":["bW9yb3Nl","YWZmbHVlbnQ=","aW1taW5lbnQ=","Y29tcGxhY2VudA=="],"c":"Y29tcGxhY2VudA=="},{"s":"RG9uJ3QgZ3JvdyBfX18ganVzdCBiZWNhdXNlIHRoZSBwcm9qZWN0IGlzIGdvaW5nIHdlbGwgcmlnaHQgbm93Lg==","o":["dml2YWNpb3Vz","Y29tcGxhY2VudA==","bHVtaW5vdXM=","bW9yb3Nl"],"c":"Y29tcGxhY2VudA=="}]},{"w":"Concur","q":[{"s":"SSBfX18gd2l0aCBteSBjb2xsZWFndWUncyBhc3Nlc3NtZW50IG9mIHRoZSBzaXR1YXRpb24u","o":["Y29uY3Vy","dW5kdWxhdGU=","ZXhwb3VuZA==","YWJzb2x2ZQ=="],"c":"Y29uY3Vy"},{"s":"TW9zdCBleHBlcnRzIF9fXyB0aGF0IHRoZSBwb2xpY3kgbmVlZHMgdG8gYmUgcmV2aXNlZC4=","o":["Y29uY3Vy","ZXhwb3VuZA==","YWJzb2x2ZQ==","Y2hhc3Rpc2U="],"c":"Y29uY3Vy"}]},{"w":"Repudiated","q":[{"s":"VGhlIGNhbmRpZGF0ZSBwdWJsaWNseSBfX18gdGhlIGVuZG9yc2VtZW50IGFmdGVyIHRoZSBjb250cm92ZXJzeS4=","o":["cmVwdWRpYXRlZA==","cmVuZGVy","Y29uY3Vy","YWJzb2x2ZQ=="],"c":"cmVwdWRpYXRlZA=="},{"s":"U2hlIF9fXyB0aGUgcnVtb3JzIGFib3V0IGhlciBpbnZvbHZlbWVudCBpbiB0aGUgc2NhbmRhbC4=","o":["cmVuZGVy","Y2hhc3Rpc2U=","cmVwdWRpYXRlZA==","ZXhwb3VuZA=="],"c":"cmVwdWRpYXRlZA=="}]},{"w":"Sanctimonious","q":[{"s":"SGlzIF9fXyBsZWN0dXJlcyBhYm91dCBob25lc3R5IHJhbmcgaG9sbG93IGdpdmVuIGhpcyBvd24gYmVoYXZpb3Iu","o":["dW5hZHVsdGVyYXRlZA==","cmVwcm9hY2hmdWw=","c2FuY3RpbW9uaW91cw==","YWZmbHVlbnQ="],"c":"c2FuY3RpbW9uaW91cw=="},{"s":"U2hlIHJvbGxlZCBoZXIgZXllcyBhdCBoaXMgX19fIHRvbmUgd2hlbmV2ZXIgaGUgZGlzY3Vzc2VkIGV0aGljcy4=","o":["Y29tcGxhY2VudA==","YWZmbHVlbnQ=","dml2YWNpb3Vz","c2FuY3RpbW9uaW91cw=="],"c":"c2FuY3RpbW9uaW91cw=="}]},{"w":"Allusion","q":[{"s":"VGhlIG5vdmVsIGNvbnRhaW5zIGEgY2xlYXIgX19fIHRvIFNoYWtlc3BlYXJlJ3MgSGFtbGV0IGluIGl0cyBvcGVuaW5nIHNjZW5lLg==","o":["aW1wdW5pdHk=","Y2F0aGFyc2lz","YWxsdXNpb24=","ZXBpcGhhbnk="],"c":"YWxsdXNpb24="},{"s":"SGVyIHNwZWVjaCBpbmNsdWRlZCBhIHN1YnRsZSBfX18gdG8gdGhlIGNpdmlsIHJpZ2h0cyBtb3ZlbWVudC4=","o":["YWZmbGljdGlvbg==","ZGVtZWFub3I=","YWxsdXNpb24=","ZXBpcGhhbnk="],"c":"YWxsdXNpb24="}]},{"w":"Parallelism","q":[{"s":"TGluY29sbidzIHVzZSBvZiBfX18g4oCUICJvZiB0aGUgcGVvcGxlLCBieSB0aGUgcGVvcGxlLCBmb3IgdGhlIHBlb3BsZSIg4oCUIGdpdmVzIHRoZSBwaHJhc2UgaXRzIHJoeXRobS4=","o":["ZmF0ZQ==","ZXhpbGU=","cGFyYWxsZWxpc20=","Y2F0aGFyc2lz"],"c":"cGFyYWxsZWxpc20="},{"s":"VGhlIGF1dGhvciB1c2VzIF9fXyB0byBjcmVhdGUgYmFsYW5jZWQsIG1lbW9yYWJsZSBzZW50ZW5jZXMu","o":["aW50cmljYWN5","cGFyYWxsZWxpc20=","ZW5taXR5","aHVicmlz"],"c":"cGFyYWxsZWxpc20="}]},{"w":"Juxtaposition","q":[{"s":"VGhlIGZpbG0ncyBwb3dlciBjb21lcyBmcm9tIHRoZSBfX18gb2Ygd2FydGltZSBicnV0YWxpdHkgYW5kIHF1aWV0IGRvbWVzdGljIHNjZW5lcy4=","o":["anV4dGFwb3NpdGlvbg==","aW5kaWduYXRpb24=","cmV2ZXJlbmNl","c292ZXJlaWdudHk="],"c":"anV4dGFwb3NpdGlvbg=="},{"s":"VGhlIGFydGlzdCB1c2VkIHRoZSBfX18gb2YgYnJpZ2h0IGNvbG9ycyBhbmQgZGFyayBzaGFkb3dzIHRvIGNyZWF0ZSB0ZW5zaW9uLg==","o":["emVhbA==","cmV2ZXJlbmNl","c292ZXJlaWdudHk=","anV4dGFwb3NpdGlvbg=="],"c":"anV4dGFwb3NpdGlvbg=="}]},{"w":"Euphemism","q":[{"s":"IlBhc3NlZCBhd2F5IiBpcyBhIGNvbW1vbiBfX18gZm9yICJkaWVkLiI=","o":["aW1wdW5pdHk=","ZXVwaGVtaXNt","aW50cmljYWN5","cmVzb2x1dGlvbg=="],"c":"ZXVwaGVtaXNt"},{"s":"VGhlIGNvbXBhbnkgdXNlZCB0aGUgX19fICJyaWdodHNpemluZyIgaW5zdGVhZCBvZiBhZG1pdHRpbmcgdGhleSB3ZXJlIGZpcmluZyBwZW9wbGUu","o":["ZXVwaGVtaXNt","cmV2ZXJlbmNl","dHJlcGlkYXRpb24=","aW5kaWduYXRpb24="],"c":"ZXVwaGVtaXNt"}]},{"w":"Oxymoron","q":[{"s":"VGhlIHBocmFzZSAiZGVhZmVuaW5nIHNpbGVuY2UiIGlzIGEgZmFtb3VzIF9fXy4=","o":["ZXhpbGU=","b3h5bW9yb24=","Y2F0aGFyc2lz","bWF4aW0="],"c":"b3h5bW9yb24="},{"s":"Q2FsbGluZyBpdCBhICJ3b3JraW5nIHZhY2F0aW9uIiBpcyBzb21ldGhpbmcgb2YgYW4gX19fLg==","o":["ZW5taXR5","ZWRpY3Q=","ZXhpbGU=","b3h5bW9yb24="],"c":"b3h5bW9yb24="}]},{"w":"Anaphora","q":[{"s":"RHIuIEtpbmcncyByZXBlYXRlZCAiSSBoYXZlIGEgZHJlYW0iIGlzIGEgY2xhc3NpYyBleGFtcGxlIG9mIF9fXy4=","o":["ZGlzZGFpbg==","ZXhpbGU=","cmVzb2x1dGlvbg==","YW5hcGhvcmE="],"c":"YW5hcGhvcmE="},{"s":"VGhlIHBvZXQgdXNlZCBfX18gYnkgYmVnaW5uaW5nIGVhY2ggc3RhbnphIHdpdGggdGhlIHNhbWUgcGhyYXNlLg==","o":["aW1wdW5pdHk=","YW5hcGhvcmE=","YWZmbGljdGlvbg==","ZW5taXR5"],"c":"YW5hcGhvcmE="}]},{"w":"Epistrophe","q":[{"s":"TGluY29sbidzICJvZiB0aGUgcGVvcGxlLCBieSB0aGUgcGVvcGxlLCBmb3IgdGhlIHBlb3BsZSIgaXMgYW4gZXhhbXBsZSBvZiBfX18g4oCUIHJlcGV0aXRpb24gYXQgdGhlIGVuZCBvZiBjbGF1c2VzLg==","o":["ZXBpcGhhbnk=","ZXBpc3Ryb3BoZQ==","bWF4aW0=","emVhbA=="],"c":"ZXBpc3Ryb3BoZQ=="},{"s":"V2hlbiBlYWNoIHNlbnRlbmNlIGVuZHMgd2l0aCB0aGUgc2FtZSB3b3JkIGZvciBlbXBoYXNpcywgdGhlIHdyaXRlciBpcyB1c2luZyBfX18u","o":["aW50cmljYWN5","emVhbA==","YWZmbGljdGlvbg==","ZXBpc3Ryb3BoZQ=="],"c":"ZXBpc3Ryb3BoZQ=="}]}];
+
+// Decode helper
+function d(str) {
+  try { return decodeURIComponent(escape(atob(str))); }
+  catch(e) { return atob(str); }
+}
+
+let quizState = {
+  questions: [],
+  currentIndex: 0,
+  score: 0,
+  wrongAnswers: []
+};
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function matchCase(template, replacement) {
+  if (template.length > 0 && template[0] === template[0].toUpperCase() && template[0] !== template[0].toLowerCase()) {
+    return replacement.charAt(0).toUpperCase() + replacement.slice(1);
+  }
+  return replacement.toLowerCase();
+}
+
+function buildQuiz() {
+  const selected = ENCODED_BANK.map(entry => {
+    // Pick one of the question versions at random and decode it
+    const versionIndex = Math.floor(Math.random() * entry.q.length);
+    const q = entry.q[versionIndex];
+
+    const decodedSentence = d(q.s);
+    const decodedCorrect = d(q.c);
+    const decodedOptions = q.o.map(o => d(o));
+
+    // Shuffle decoded options at render time (extra entropy)
+    const shuffledOptions = shuffleArray(decodedOptions);
+
+    return {
+      word: entry.w,
+      sentence: decodedSentence,
+      options: shuffledOptions,
+      correctAnswer: decodedCorrect
+    };
+  });
+
+  quizState.questions = shuffleArray(selected);
+  quizState.currentIndex = 0;
+  quizState.score = 0;
+  quizState.wrongAnswers = [];
+}
+
+function renderStartScreen() {
+  document.getElementById('header-sub').textContent = `Test your knowledge — ${ENCODED_BANK.length} questions`;
+  document.getElementById('progress-text').textContent = 'Ready to begin';
+  document.getElementById('progress-fill').style.width = '0%';
+
+  document.getElementById('content').innerHTML = `
+    <div class="start-screen">
+      <h2>Ready to test your vocabulary?</h2>
+      <p>You'll get one question per word — fill in the blank with the best answer.<br>Questions and answer order are randomized each time.</p>
+      <div class="stat-row">
+        <div class="stat">
+          <div class="stat-number">${ENCODED_BANK.length}</div>
+          <div class="stat-label">Questions</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">4</div>
+          <div class="stat-label">Choices each</div>
+        </div>
+      </div>
+      <button class="restart-btn" onclick="startQuiz()">Start Quiz</button>
+    </div>
+  `;
+}
+
+function startQuiz() {
+  buildQuiz();
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizState.questions[quizState.currentIndex];
+  const progress = ((quizState.currentIndex) / quizState.questions.length) * 100;
+  document.getElementById('progress-fill').style.width = progress + '%';
+  document.getElementById('progress-text').textContent =
+    `Question ${quizState.currentIndex + 1} of ${quizState.questions.length}`;
+  document.getElementById('header-sub').textContent =
+    `Score: ${quizState.score} / ${quizState.currentIndex}`;
+
+  const container = document.createElement('div');
+
+  const sentenceDiv = document.createElement('div');
+  sentenceDiv.className = 'question';
+  sentenceDiv.innerHTML = escapeHtml(q.sentence).replace('___', '<span class="blank">_____</span>');
+  container.appendChild(sentenceDiv);
+
+  const optionsDiv = document.createElement('div');
+  optionsDiv.className = 'options';
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    const displayOpt = matchCase(q.correctAnswer, opt);
+
+    const letterSpan = document.createElement('span');
+    letterSpan.className = 'option-letter';
+    letterSpan.textContent = String.fromCharCode(65 + i);
+
+    const textSpan = document.createElement('span');
+    textSpan.className = 'option-text';
+    textSpan.textContent = displayOpt;
+
+    btn.appendChild(letterSpan);
+    btn.appendChild(textSpan);
+
+    // Attach the actual option value via a closure, not as a DOM attribute,
+    // so it doesn't appear in the rendered HTML
+    btn.addEventListener('click', () => selectAnswer(btn, opt));
+
+    optionsDiv.appendChild(btn);
+  });
+
+  container.appendChild(optionsDiv);
+
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+  content.appendChild(container);
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function selectAnswer(button, selectedOption) {
+  const q = quizState.questions[quizState.currentIndex];
+  const allButtons = document.querySelectorAll('.option');
+  allButtons.forEach(b => b.disabled = true);
+
+  const isCorrect = selectedOption.toLowerCase() === q.correctAnswer.toLowerCase();
+
+  if (isCorrect) {
+    button.classList.add('correct');
+    quizState.score++;
+  } else {
+    button.classList.add('wrong');
+    // Highlight the correct answer by matching its text content
+    const correctDisplay = matchCase(q.correctAnswer, q.correctAnswer);
+    allButtons.forEach(b => {
+      const text = b.querySelector('.option-text').textContent;
+      if (text === correctDisplay) {
+        b.classList.add('correct');
+      }
+    });
+    quizState.wrongAnswers.push({
+      word: q.word,
+      sentence: q.sentence,
+      yourAnswer: matchCase(q.correctAnswer, selectedOption),
+      correctAnswer: matchCase(q.correctAnswer, q.correctAnswer)
+    });
+  }
+
+  setTimeout(() => {
+    quizState.currentIndex++;
+    if (quizState.currentIndex >= quizState.questions.length) {
+      renderResults();
+    } else {
+      renderQuestion();
+    }
+  }, isCorrect ? 700 : 1400);
+}
+
+function renderResults() {
+  const total = quizState.questions.length;
+  const score = quizState.score;
+  const percent = Math.round((score / total) * 100);
+
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-text').textContent = 'Quiz complete!';
+  document.getElementById('header-sub').textContent = `Final score: ${score} / ${total}`;
+
+  let grade, message;
+  if (percent >= 90) { grade = 'Excellent! 🌟'; message = 'Outstanding command of vocabulary.'; }
+  else if (percent >= 80) { grade = 'Great Job! 👏'; message = 'Strong performance — just a few to review.'; }
+  else if (percent >= 70) { grade = 'Good Work! 👍'; message = 'Solid understanding with some room to grow.'; }
+  else if (percent >= 60) { grade = 'Keep Practicing! 💪'; message = "You're getting there — review and try again."; }
+  else { grade = 'Time to Study! 📖'; message = 'Review the missed words and give it another go.'; }
+
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'results';
+
+  wrapper.innerHTML = `
+    <div class="score-circle">
+      <div class="score-percent">${percent}%</div>
+      <div class="score-fraction">${score} / ${total}</div>
+    </div>
+    <div class="grade-label">${grade}</div>
+    <div class="grade-message">${message}</div>
+  `;
+
+  if (quizState.wrongAnswers.length === 0) {
+    const perfect = document.createElement('div');
+    perfect.className = 'perfect-message';
+    perfect.textContent = '🎉 Perfect score! Every answer was correct.';
+    wrapper.appendChild(perfect);
+  } else {
+    const review = document.createElement('div');
+    review.className = 'review-section';
+    const h3 = document.createElement('h3');
+    h3.textContent = `Review missed questions (${quizState.wrongAnswers.length})`;
+    review.appendChild(h3);
+
+    quizState.wrongAnswers.forEach(w => {
+      const item = document.createElement('div');
+      item.className = 'review-item';
+
+      const wordTag = document.createElement('div');
+      wordTag.className = 'review-word';
+      wordTag.textContent = w.word;
+
+      const qText = document.createElement('div');
+      qText.className = 'review-question';
+      qText.innerHTML = escapeHtml(w.sentence).replace('___', '<strong>_____</strong>');
+
+      const yourAns = document.createElement('div');
+      yourAns.className = 'review-answer your-answer';
+      yourAns.innerHTML = '<span class="label">Your answer:</span>';
+      yourAns.appendChild(document.createTextNode(w.yourAnswer));
+
+      const correctAns = document.createElement('div');
+      correctAns.className = 'review-answer correct-answer';
+      correctAns.innerHTML = '<span class="label">Correct answer:</span>';
+      correctAns.appendChild(document.createTextNode(w.correctAnswer));
+
+      item.appendChild(wordTag);
+      item.appendChild(qText);
+      item.appendChild(yourAns);
+      item.appendChild(correctAns);
+      review.appendChild(item);
+    });
+
+    wrapper.appendChild(review);
+  }
+
+  const restart = document.createElement('button');
+  restart.className = 'restart-btn';
+  restart.textContent = 'Try Again with New Questions';
+  restart.onclick = startQuiz;
+  wrapper.appendChild(restart);
+
+  content.appendChild(wrapper);
+}
+
+renderStartScreen();
+</script>
+
+</body>
+</html>
