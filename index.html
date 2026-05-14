@@ -3,395 +3,1617 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vocabulary Quiz</title>
+<title>VOCAB QUEST :: A Retro Vocabulary Challenge</title>
+
+<!-- Pixel + Retro display fonts, plus a readable body font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg-1: #0f172a;
-    --bg-2: #1e293b;
-    --card: #ffffff;
-    --primary: #6366f1;
-    --primary-dark: #4f46e5;
-    --correct: #10b981;
-    --wrong: #ef4444;
-    --text: #1e293b;
-    --text-light: #64748b;
-    --border: #e2e8f0;
+    /* Retro-arcade palette: hot pink, electric cyan, gold, deep purple */
+    --bg-deep: #1a0033;
+    --bg-mid: #2d0a4e;
+    --neon-pink: #ff2e93;
+    --neon-cyan: #00f0ff;
+    --neon-yellow: #ffd60a;
+    --neon-green: #39ff14;
+    --neon-red: #ff3860;
+    --paper: #fff8e7;
+    --ink: #1a0033;
+    --ink-soft: #4a2a6d;
+    --grid-line: rgba(0, 240, 255, 0.08);
+
+    --font-display: 'Press Start 2P', monospace;
+    --font-retro: 'VT323', monospace;
+    --font-body: 'Outfit', sans-serif;
+  }
+
+  html, body {
+    overscroll-behavior: none;
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 100%);
+    font-family: var(--font-body);
     min-height: 100vh;
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse at top, #4a1a7a 0%, var(--bg-deep) 60%),
+      var(--bg-deep);
+    background-attachment: fixed;
+    padding: 16px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 20px;
-    color: var(--text);
+    overflow-x: hidden;
+    position: relative;
   }
 
+  /* Animated background grid - subtle perspective effect */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    animation: gridDrift 20s linear infinite;
+  }
+
+  @keyframes gridDrift {
+    from { transform: translate(0, 0); }
+    to { transform: translate(40px, 40px); }
+  }
+
+  /* Floating sparkles */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.3), transparent),
+      radial-gradient(1px 1px at 80% 10%, rgba(0, 240, 255, 0.5), transparent),
+      radial-gradient(2px 2px at 60% 70%, rgba(255, 46, 147, 0.3), transparent),
+      radial-gradient(1px 1px at 90% 50%, rgba(255, 214, 10, 0.5), transparent),
+      radial-gradient(2px 2px at 33% 85%, rgba(57, 255, 20, 0.3), transparent);
+    background-size: 250px 250px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* The main quiz container - chunky retro card */
   .container {
-    background: var(--card);
-    border-radius: 20px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    position: relative;
+    z-index: 1;
     width: 100%;
-    max-width: 720px;
+    max-width: 760px;
+    margin: 16px 0;
+  }
+
+  .card {
+    background: var(--paper);
+    border: 4px solid var(--ink);
+    border-radius: 8px;
+    box-shadow:
+      8px 8px 0 var(--neon-pink),
+      8px 8px 0 4px var(--ink);
+    position: relative;
     overflow: hidden;
   }
 
+  /* Header with marquee feel */
   .header {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: white;
-    padding: 28px 32px;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--bg-deep) 0,
+        var(--bg-deep) 20px,
+        #2d0a4e 20px,
+        #2d0a4e 40px
+      );
+    color: var(--paper);
+    padding: 20px 24px;
+    border-bottom: 4px solid var(--ink);
+    position: relative;
+  }
+
+  .header::after {
+    /* Scanline overlay */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15) 0px,
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
   }
 
   .header h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin-bottom: 4px;
+    font-family: var(--font-display);
+    font-size: clamp(0.95rem, 3vw, 1.4rem);
+    line-height: 1.4;
+    margin-bottom: 8px;
+    color: var(--neon-yellow);
+    text-shadow:
+      2px 2px 0 var(--neon-pink),
+      4px 4px 0 var(--ink);
+    letter-spacing: 0.05em;
   }
 
-  .header p {
-    opacity: 0.9;
-    font-size: 0.95rem;
+  .header-sub {
+    font-family: var(--font-retro);
+    font-size: 1.25rem;
+    color: var(--neon-cyan);
+    letter-spacing: 0.08em;
+    text-shadow: 1px 1px 0 var(--ink);
   }
 
-  .progress-bar {
-    height: 8px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 4px;
-    margin-top: 16px;
+  .progress-track {
+    margin-top: 14px;
+    height: 14px;
+    background: var(--ink);
+    border: 2px solid var(--paper);
+    position: relative;
     overflow: hidden;
   }
 
   .progress-fill {
     height: 100%;
-    background: white;
     width: 0%;
-    transition: width 0.4s ease;
-    border-radius: 4px;
+    background: linear-gradient(90deg, var(--neon-pink) 0%, var(--neon-yellow) 50%, var(--neon-green) 100%);
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .progress-fill::after {
+    /* Glow on the leading edge */
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -2px;
+    bottom: -2px;
+    width: 8px;
+    background: var(--paper);
+    box-shadow: 0 0 12px var(--paper);
   }
 
   .progress-text {
-    font-size: 0.85rem;
-    margin-top: 8px;
-    opacity: 0.9;
+    font-family: var(--font-retro);
+    font-size: 1.1rem;
+    color: var(--paper);
+    margin-top: 6px;
+    letter-spacing: 0.06em;
   }
 
+  /* Main content area */
   .content {
-    padding: 36px 32px;
+    padding: 32px 28px;
+    background: var(--paper);
+    position: relative;
+    min-height: 360px;
   }
 
-  .vocab-word {
-    display: inline-block;
-    background: #eef2ff;
-    color: var(--primary-dark);
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 0.85rem;
-    font-weight: 600;
+  /* Paper texture overlay */
+  .content::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(26, 0, 51, 0.04) 1px, transparent 0);
+    background-size: 18px 18px;
+    pointer-events: none;
+  }
+
+  .content > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* === START SCREEN === */
+  .start-screen {
+    text-align: center;
+    padding: 24px 0;
+  }
+
+  .start-screen .hero-art {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 20px;
+    display: block;
+  }
+
+  .start-screen h2 {
+    font-family: var(--font-display);
+    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 14px;
+  }
+
+  .start-screen .tagline {
+    font-family: var(--font-retro);
+    font-size: 1.3rem;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+    letter-spacing: 0.04em;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    background: var(--bg-deep);
+    color: var(--neon-yellow);
+    border: 3px solid var(--ink);
+    padding: 14px 22px;
+    min-width: 110px;
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .stat-number {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--neon-yellow);
+    text-shadow: 2px 2px 0 var(--neon-pink);
+  }
+
+  .stat-label {
+    font-family: var(--font-retro);
+    font-size: 1rem;
+    color: var(--neon-cyan);
+    margin-top: 6px;
+    letter-spacing: 0.06em;
+  }
+
+  /* === QUESTION SCREEN === */
+  .question-area {
+    animation: fadeInUp 0.4s ease;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    color: var(--neon-pink);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 20px;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
   }
 
   .question {
-    font-size: 1.25rem;
+    font-family: var(--font-body);
+    font-size: clamp(1.1rem, 2.8vw, 1.3rem);
+    font-weight: 500;
     line-height: 1.6;
     margin-bottom: 28px;
-    color: var(--text);
+    color: var(--ink);
   }
 
   .blank {
     display: inline-block;
-    min-width: 80px;
-    border-bottom: 2px solid var(--primary);
+    min-width: 90px;
+    border-bottom: 3px solid var(--neon-pink);
     margin: 0 4px;
     text-align: center;
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--neon-pink);
+  }
+
+  /* Combo/streak indicator */
+  .combo-badge {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    background: var(--neon-yellow);
+    color: var(--ink);
+    padding: 4px 8px;
+    border: 2px solid var(--ink);
+    margin-left: 8px;
+    box-shadow: 2px 2px 0 var(--ink);
+    animation: comboPop 0.3s ease;
+  }
+
+  @keyframes comboPop {
+    0% { transform: scale(0.5); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
   }
 
   .options {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .option {
-    background: #f8fafc;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 20px;
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    border-radius: 4px;
+    padding: 14px 18px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 1rem;
+    font-size: 1.05rem;
+    font-weight: 500;
     text-align: left;
-    font-family: inherit;
-    color: var(--text);
+    font-family: var(--font-body);
+    color: var(--ink);
     display: flex;
     align-items: center;
     gap: 12px;
+    box-shadow: 4px 4px 0 var(--ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .option:hover:not(:disabled) {
-    border-color: var(--primary);
-    background: #eef2ff;
-    transform: translateX(4px);
+  /* Hover styles ONLY on devices that actually hover (desktop).
+     This fixes the iPhone sticky-hover bug where the next question
+     would render with one button looking pre-selected. */
+  @media (hover: hover) {
+    .option:hover:not(:disabled) {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 var(--neon-pink), 6px 6px 0 3px var(--ink);
+      background: #fff;
+    }
+  }
+
+  .option:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
   }
 
   .option-letter {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: white;
-    border: 2px solid var(--border);
-    font-weight: 600;
-    font-size: 0.85rem;
+    width: 32px;
+    height: 32px;
+    background: var(--bg-deep);
+    color: var(--neon-yellow);
+    border: 2px solid var(--ink);
+    font-family: var(--font-display);
+    font-size: 0.75rem;
     flex-shrink: 0;
   }
 
   .option.correct {
-    background: #d1fae5;
-    border-color: var(--correct);
-    color: #065f46;
+    background: var(--neon-green);
+    color: var(--ink);
+    border-color: var(--ink);
+    animation: correctPulse 0.5s ease;
   }
 
   .option.correct .option-letter {
-    background: var(--correct);
-    border-color: var(--correct);
-    color: white;
+    background: var(--ink);
+    color: var(--neon-green);
+  }
+
+  @keyframes correctPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
   }
 
   .option.wrong {
-    background: #fee2e2;
-    border-color: var(--wrong);
-    color: #991b1b;
+    background: var(--neon-red);
+    color: var(--paper);
+    border-color: var(--ink);
+    animation: wrongShake 0.5s ease;
   }
 
   .option.wrong .option-letter {
-    background: var(--wrong);
-    border-color: var(--wrong);
-    color: white;
+    background: var(--ink);
+    color: var(--neon-red);
+  }
+
+  @keyframes wrongShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
   }
 
   .option:disabled {
     cursor: not-allowed;
   }
 
-  .results {
-    text-align: center;
-    padding: 20px 0;
+  /* === DEFINITION PANEL (shown on wrong answer) === */
+  .definition-panel {
+    margin-top: 24px;
+    background: var(--bg-deep);
+    color: var(--paper);
+    border: 4px solid var(--ink);
+    padding: 20px;
+    box-shadow: 6px 6px 0 var(--neon-cyan), 6px 6px 0 4px var(--ink);
+    animation: slideInPanel 0.4s ease;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
   }
 
-  .score-circle {
+  @keyframes slideInPanel {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .definition-panel .panel-art {
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+  }
+
+  .definition-panel .panel-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .definition-word {
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    color: var(--neon-yellow);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .definition-text {
+    font-family: var(--font-retro);
+    font-size: 1.25rem;
+    line-height: 1.4;
+    color: var(--paper);
+    margin-bottom: 16px;
+    letter-spacing: 0.02em;
+  }
+
+  .next-btn {
+    background: var(--neon-yellow);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    padding: 10px 22px;
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    letter-spacing: 0.05em;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (hover: hover) {
+    .next-btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 var(--ink);
+      background: #fff;
+    }
+  }
+
+  .next-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  /* === START / RESTART button === */
+  .start-btn {
+    background: var(--neon-pink);
+    color: var(--paper);
+    border: 4px solid var(--ink);
+    padding: 16px 36px;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 6px 6px 0 var(--ink);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    letter-spacing: 0.08em;
+    margin-top: 16px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (hover: hover) {
+    .start-btn:hover {
+      transform: translate(-3px, -3px) rotate(-1deg);
+      box-shadow: 9px 9px 0 var(--neon-yellow), 9px 9px 0 4px var(--ink);
+    }
+  }
+
+  .start-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  /* === RESULTS SCREEN === */
+  .results {
+    text-align: center;
+    padding: 16px 0;
+  }
+
+  .results-art {
     width: 160px;
     height: 160px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 24px;
-    color: white;
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+    margin: 0 auto 16px;
+  }
+
+  .score-display {
+    margin-bottom: 20px;
   }
 
   .score-percent {
-    font-size: 2.5rem;
-    font-weight: 700;
-    line-height: 1;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    color: var(--neon-pink);
+    text-shadow:
+      3px 3px 0 var(--ink),
+      6px 6px 0 var(--neon-yellow);
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
   }
 
   .score-fraction {
-    font-size: 0.9rem;
-    opacity: 0.9;
-    margin-top: 4px;
+    font-family: var(--font-retro);
+    font-size: 1.6rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.06em;
   }
 
   .grade-label {
-    font-size: 1.5rem;
-    font-weight: 600;
+    font-family: var(--font-display);
+    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+    color: var(--ink);
+    margin-top: 16px;
     margin-bottom: 8px;
+    line-height: 1.4;
   }
 
   .grade-message {
-    color: var(--text-light);
-    margin-bottom: 28px;
+    font-family: var(--font-retro);
+    font-size: 1.3rem;
+    color: var(--ink-soft);
+    margin-bottom: 24px;
+    letter-spacing: 0.03em;
   }
 
+  .perfect-message {
+    background: var(--neon-green);
+    border: 4px solid var(--ink);
+    color: var(--ink);
+    padding: 18px;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    box-shadow: 6px 6px 0 var(--ink);
+    margin-top: 20px;
+  }
+
+  /* Review section */
   .review-section {
     margin-top: 32px;
     text-align: left;
   }
 
   .review-section h3 {
-    font-size: 1.15rem;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    color: var(--ink);
     margin-bottom: 16px;
-    color: var(--text);
+    line-height: 1.4;
   }
 
   .review-item {
-    background: #f8fafc;
-    border-left: 4px solid var(--wrong);
-    border-radius: 8px;
-    padding: 16px 20px;
-    margin-bottom: 12px;
-  }
-
-  .review-question {
-    font-size: 0.95rem;
-    margin-bottom: 10px;
-    line-height: 1.5;
+    background: #fff;
+    border: 3px solid var(--ink);
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    box-shadow: 4px 4px 0 var(--neon-red), 4px 4px 0 3px var(--ink);
   }
 
   .review-word {
     display: inline-block;
-    background: #eef2ff;
-    color: var(--primary-dark);
-    padding: 2px 10px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    background: var(--bg-deep);
+    color: var(--neon-yellow);
+    padding: 4px 10px;
+    font-family: var(--font-display);
+    font-size: 0.65rem;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    border: 2px solid var(--ink);
+  }
+
+  .review-question {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+    color: var(--ink);
   }
 
   .review-answer {
-    font-size: 0.9rem;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
     margin-top: 6px;
   }
 
   .review-answer.your-answer {
-    color: var(--wrong);
+    color: var(--neon-red);
   }
 
   .review-answer.correct-answer {
-    color: var(--correct);
+    color: #1d8e3a;
     font-weight: 600;
   }
 
   .review-answer .label {
-    font-weight: 600;
-    color: var(--text-light);
+    font-weight: 700;
+    color: var(--ink-soft);
     margin-right: 6px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
   }
 
-  .perfect-message {
-    background: #d1fae5;
-    border-left: 4px solid var(--correct);
-    color: #065f46;
-    padding: 20px;
-    border-radius: 8px;
-    font-size: 1rem;
-    text-align: center;
+  .review-definition {
+    font-family: var(--font-retro);
+    font-size: 1.15rem;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 2px dashed var(--ink-soft);
+    color: var(--ink);
+    line-height: 1.4;
   }
 
-  .restart-btn {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: white;
-    border: none;
-    padding: 14px 36px;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-top: 24px;
-    transition: transform 0.2s;
-    font-family: inherit;
+  .review-definition .label {
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--neon-pink);
+    margin-right: 6px;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
   }
 
-  .restart-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+  /* === CONFETTI (correct-answer celebration) === */
+  .confetti-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    overflow: hidden;
   }
 
-  .start-screen {
-    text-align: center;
-    padding: 20px 0;
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 14px;
+    top: -20px;
+    animation: confettiFall 1.4s ease-out forwards;
   }
 
-  .start-screen h2 {
+  @keyframes confettiFall {
+    0% {
+      transform: translateY(0) rotate(0deg);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  /* === SHAKE the whole card on wrong answer === */
+  .card.shake {
+    animation: cardShake 0.5s ease;
+  }
+
+  @keyframes cardShake {
+    0%, 100% { transform: translate(0, 0); }
+    20% { transform: translate(-6px, 2px); }
+    40% { transform: translate(6px, -2px); }
+    60% { transform: translate(-4px, 2px); }
+    80% { transform: translate(4px, -2px); }
+  }
+
+  /* === FLASH overlay on correct (subtle green pulse) === */
+  .flash-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99;
+    animation: flashGreen 0.6s ease-out forwards;
+  }
+
+  .flash-overlay.wrong {
+    animation: flashRed 0.6s ease-out forwards;
+  }
+
+  @keyframes flashGreen {
+    0% { background: rgba(57, 255, 20, 0.4); }
+    100% { background: rgba(57, 255, 20, 0); }
+  }
+
+  @keyframes flashRed {
+    0% { background: rgba(255, 56, 96, 0.35); }
+    100% { background: rgba(255, 56, 96, 0); }
+  }
+
+  /* === GIANT REACTION POPUP === */
+  .reaction-popup {
+    position: fixed;
+    /* Position high up so it doesn't overlap the definition panel that
+       appears below the answer options on wrong answers. */
+    top: 22%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    z-index: 101;
+    pointer-events: none;
+    animation: reactionPop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  @keyframes reactionPop {
+    0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 1; }
+    20% { transform: translate(-50%, -50%) scale(1.1) rotate(5deg); opacity: 1; }
+    40% { transform: translate(-50%, -50%) scale(0.95) rotate(-2deg); opacity: 1; }
+    60% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.1) rotate(0deg); opacity: 0; }
+  }
+
+  .reaction-popup svg {
+    width: 160px;
+    height: 160px;
+    filter: drop-shadow(6px 6px 0 var(--ink));
+    display: block;
+  }
+
+  /* Text sits in a big chunky banner below the icon. */
+  .reaction-text {
+    font-family: var(--font-display);
     font-size: 1.5rem;
+    color: var(--neon-yellow);
+    background: var(--bg-deep);
+    padding: 14px 28px;
+    border: 4px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--neon-pink), 6px 6px 0 4px var(--ink);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .reaction-text.wrong-text {
+    color: var(--neon-red);
+    box-shadow: 6px 6px 0 var(--neon-yellow), 6px 6px 0 4px var(--ink);
+  }
+
+  /* === Mobile tweaks === */
+  @media (max-width: 600px) {
+    body { padding: 8px; }
+    .card { box-shadow: 5px 5px 0 var(--neon-pink), 5px 5px 0 3px var(--ink); }
+    .header { padding: 16px 18px; }
+    .content { padding: 22px 18px; }
+    .option { padding: 12px 14px; font-size: 1rem; box-shadow: 3px 3px 0 var(--ink); }
+    .definition-panel { padding: 16px; gap: 12px; box-shadow: 4px 4px 0 var(--neon-cyan), 4px 4px 0 3px var(--ink); }
+    .definition-panel .panel-art { width: 56px; height: 56px; }
+    .start-btn { padding: 14px 24px; font-size: 0.7rem; }
+    /* Tighter start screen on mobile so the floppy + heading + button fit */
+    .start-screen { padding: 8px 0; }
+    .start-screen .hero-art { width: 110px; height: 110px; margin-bottom: 12px; }
+    .start-screen h2 { font-size: 0.85rem; margin-bottom: 8px; }
+    .start-screen .tagline { font-size: 1.1rem; margin-bottom: 14px; }
+    .stat-row { margin: 14px 0; gap: 10px; }
+    .stat { padding: 10px 16px; min-width: 80px; box-shadow: 3px 3px 0 var(--ink); }
+    .stat-number { font-size: 1.1rem; }
+    .stat-label { font-size: 0.85rem; }
+    .reaction-popup { gap: 10px; top: 18%; }
+    .reaction-popup svg { width: 110px; height: 110px; }
+    .reaction-text { font-size: 1rem; padding: 10px 18px; box-shadow: 4px 4px 0 var(--neon-pink), 4px 4px 0 3px var(--ink); }
+    .reaction-text.wrong-text { box-shadow: 4px 4px 0 var(--neon-yellow), 4px 4px 0 3px var(--ink); }
+  }
+
+  /* === BADGE SYSTEM === */
+  .badge-tray {
+    background: var(--ink);
+    border-bottom: 4px solid var(--neon-pink);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 56px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* Hide scrollbar but keep scroll functional */
+    scrollbar-width: thin;
+    scrollbar-color: var(--neon-pink) transparent;
+  }
+
+  .badge-tray::-webkit-scrollbar { height: 4px; }
+  .badge-tray::-webkit-scrollbar-track { background: transparent; }
+  .badge-tray::-webkit-scrollbar-thumb { background: var(--neon-pink); }
+
+  .badge-tray-label {
+    font-family: var(--font-display);
+    font-size: 0.55rem;
+    color: var(--neon-cyan);
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+    margin-right: 4px;
+    white-space: nowrap;
+  }
+
+  .badge-tray-empty {
+    font-family: var(--font-retro);
+    font-size: 1rem;
+    color: var(--ink-soft);
+    opacity: 0.6;
+    letter-spacing: 0.04em;
+  }
+
+  .badge-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border: 2px solid var(--neon-pink);
+    background: var(--bg-deep);
+    cursor: help;
+    transition: transform 0.15s ease;
+    position: relative;
+    animation: badgeAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes badgeAppear {
+    0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+    60% { transform: scale(1.15) rotate(0deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  @media (hover: hover) {
+    .badge-icon:hover {
+      transform: scale(1.15);
+      z-index: 5;
+    }
+  }
+
+  .badge-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Tooltip on hover */
+  .badge-icon::after {
+    content: attr(data-name);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--neon-yellow);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 0.55rem;
+    padding: 4px 8px;
+    white-space: nowrap;
+    border: 2px solid var(--ink);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 10;
+  }
+
+  @media (hover: hover) {
+    .badge-icon:hover::after {
+      opacity: 1;
+    }
+  }
+
+  /* === BADGE UNLOCK NOTIFICATION === */
+  .badge-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-deep);
+    border: 4px solid var(--neon-yellow);
+    box-shadow: 8px 8px 0 var(--neon-pink), 8px 8px 0 4px var(--ink);
+    padding: 24px 32px;
+    z-index: 102;
+    text-align: center;
+    pointer-events: none;
+    animation: badgeUnlock 2.2s ease forwards;
+    max-width: 90vw;
+  }
+
+  /* For badges with longer descriptions, give the reader more time */
+  .badge-notification.long-desc {
+    animation: badgeUnlockLong 4s ease forwards;
+  }
+
+  @keyframes badgeUnlock {
+    0% { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+    15% { transform: translate(-50%, -50%) scale(1.1) rotate(3deg); opacity: 1; }
+    25% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    80% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.9) translateY(-40px); opacity: 0; }
+  }
+
+  @keyframes badgeUnlockLong {
+    0% { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 0; }
+    8% { transform: translate(-50%, -50%) scale(1.1) rotate(3deg); opacity: 1; }
+    14% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    88% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.9) translateY(-40px); opacity: 0; }
+  }
+
+  .badge-notification .unlock-label {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    color: var(--neon-cyan);
+    letter-spacing: 0.1em;
     margin-bottom: 12px;
   }
 
-  .start-screen p {
-    color: var(--text-light);
-    margin-bottom: 24px;
-    line-height: 1.6;
+  .badge-notification .unlock-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 14px;
+    border: 3px solid var(--neon-pink);
   }
 
-  .stat-row {
-    display: flex;
-    justify-content: center;
-    gap: 24px;
-    margin: 24px 0;
-    flex-wrap: wrap;
+  .badge-notification .unlock-name {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--neon-yellow);
+    text-shadow: 2px 2px 0 var(--ink);
+    line-height: 1.3;
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
   }
 
-  .stat {
-    background: #f1f5f9;
-    padding: 16px 24px;
-    border-radius: 12px;
-    min-width: 120px;
+  .badge-notification .unlock-desc {
+    font-family: var(--font-retro);
+    font-size: 1.1rem;
+    color: var(--paper);
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    max-width: 320px;
   }
 
-  .stat-number {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--primary);
-  }
-
-  .stat-label {
-    font-size: 0.85rem;
-    color: var(--text-light);
-    margin-top: 2px;
-  }
-
+  /* Mobile tweaks for badges */
   @media (max-width: 600px) {
-    .header { padding: 20px 24px; }
-    .content { padding: 24px 20px; }
-    .header h1 { font-size: 1.4rem; }
-    .question { font-size: 1.1rem; }
-    .option { padding: 14px 16px; font-size: 0.95rem; }
+    .badge-tray { padding: 8px 12px; min-height: 48px; gap: 6px; }
+    .badge-tray-label { font-size: 0.5rem; }
+    .badge-icon { width: 32px; height: 32px; }
+    .badge-notification { padding: 18px 22px; }
+    .badge-notification .unlock-icon { width: 60px; height: 60px; }
+    .badge-notification .unlock-name { font-size: 0.8rem; }
+    .badge-notification .unlock-desc { font-size: 1rem; }
+  }
+
+  /* === BADGE SUMMARY (on results screen) === */
+  .badge-summary {
+    margin-top: 28px;
+    text-align: left;
+  }
+
+  .badge-summary h3 {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    color: var(--ink);
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
+  .badge-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  .badge-summary-item {
+    background: var(--bg-deep);
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--neon-yellow), 4px 4px 0 3px var(--ink);
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .badge-summary-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--neon-pink);
+  }
+
+  .badge-summary-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .badge-summary-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .badge-summary-name {
+    font-family: var(--font-display);
+    font-size: 0.6rem;
+    color: var(--neon-yellow);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .badge-summary-desc {
+    font-family: var(--font-retro);
+    font-size: 1rem;
+    color: var(--paper);
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
+
+  /* Reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="header">
-    <h1>📚 Vocabulary Quiz</h1>
-    <p id="header-sub">Test your knowledge — 64 questions</p>
-    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-    <div class="progress-text" id="progress-text">Ready to begin</div>
+  <div class="card" id="card">
+    <div class="header">
+      <h1>VOCAB QUEST</h1>
+      <div class="header-sub" id="header-sub">READY PLAYER ONE</div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-text" id="progress-text">&gt; INSERT COIN TO BEGIN</div>
+    </div>
+    <div class="badge-tray" id="badge-tray">
+      <span class="badge-tray-label">▸ BADGES</span>
+      <span class="badge-tray-empty" id="badge-tray-empty">none earned yet</span>
+    </div>
+    <div class="content" id="content"></div>
   </div>
-
-  <div class="content" id="content"></div>
 </div>
 
-<script>
-// Question data is Base64-encoded to prevent answers from being visible
-// in page source. Decoded at runtime only when a question is rendered.
-const ENCODED_BANK = [{"w":"Unadulterated","q":[{"s":"VGhlIGNoaWxkJ3MgbGF1Z2h0ZXIgd2FzIGEgbW9tZW50IG9mIF9fXyBqb3ksIHVudG91Y2hlZCBieSBhbnkgd29ycnkgb3IgY2FyZS4=","o":["aW1taW5lbnQ=","dW5hZHVsdGVyYXRlZA==","dHJlYWNoZXJvdXM=","Z2xhcmluZw=="],"c":"dW5hZHVsdGVyYXRlZA=="},{"s":"U2hlIG9mZmVyZWQgaGVyIF9fXyBvcGluaW9uLCBmcmVlIGZyb20gZmxhdHRlcnkgb3IgcG9saXRpY2FsIGNvbmNlcm4u","o":["dW5hZHVsdGVyYXRlZA==","YWZmbHVlbnQ=","dHJlYWNoZXJvdXM=","aW1taW5lbnQ="],"c":"dW5hZHVsdGVyYXRlZA=="}]},{"w":"Ample","q":[{"s":"VGhlcmUgd2FzIF9fXyB0aW1lIHRvIGZpbmlzaCB0aGUgcHJvamVjdCBiZWZvcmUgdGhlIGRlYWRsaW5lLg==","o":["YWxvb2Y=","c2FuY3RpbW9uaW91cw==","cHJvdmluY2lhbA==","YW1wbGU="],"c":"YW1wbGU="},{"s":"VGhlIG5ldyBhcGFydG1lbnQgaGFkIF9fXyBzdG9yYWdlIHNwYWNlIGZvciBhbGwgb2YgdGhlaXIgYmVsb25naW5ncy4=","o":["dHJlYWNoZXJvdXM=","YW1wbGU=","cHJvdmluY2lhbA==","Y29tcGxhY2VudA=="],"c":"YW1wbGU="}]},{"w":"Undulate","q":[{"s":"VGhlIGZpZWxkcyBvZiB3aGVhdCBiZWdhbiB0byBfX18gZ2VudGx5IGluIHRoZSBzdW1tZXIgYnJlZXplLg==","o":["cmVwdWRpYXRlZA==","YWRtb25pc2g=","cmVuZGVy","dW5kdWxhdGU="],"c":"dW5kdWxhdGU="},{"s":"V2Ugd2F0Y2hlZCB0aGUgc25ha2UncyBib2R5IF9fXyBzbW9vdGhseSBhY3Jvc3MgdGhlIGRlc2VydCBzYW5kLg==","o":["YWJzb2x2ZQ==","Y2hhc3Rpc2U=","Y29uY3Vy","dW5kdWxhdGU="],"c":"dW5kdWxhdGU="}]},{"w":"Epiphany","q":[{"s":"V2hpbGUgd2Fsa2luZyBob21lLCBzaGUgaGFkIGEgc3VkZGVuIF9fXyBhYm91dCB3aHkgaGVyIHBsYW4gaGFkIGJlZW4gZmFpbGluZy4=","o":["ZXBpcGhhbnk=","aW50cmljYWN5","Y291cA==","b3h5bW9yb24="],"c":"ZXBpcGhhbnk="},{"s":"VGhlIHNjaWVudGlzdCdzIF9fXyBjYW1lIGluIHRoZSBtaWRkbGUgb2YgdGhlIG5pZ2h0LCBmaW5hbGx5IHNvbHZpbmcgdGhlIGVxdWF0aW9uLg==","o":["aW1wdW5pdHk=","b3h5bW9yb24=","cmV0cmlidXRpb24=","ZXBpcGhhbnk="],"c":"ZXBpcGhhbnk="}]},{"w":"Absolve","q":[{"s":"VGhlIGp1ZGdlIGNob3NlIHRvIF9fXyB0aGUgZGVmZW5kYW50IG9mIGFueSB3cm9uZ2RvaW5nIGFmdGVyIG5ldyBldmlkZW5jZSBlbWVyZ2VkLg==","o":["YWJzb2x2ZQ==","Y2hhc3Rpc2U=","Y29uY3Vy","Y2Vuc3VyZQ=="],"c":"YWJzb2x2ZQ=="},{"s":"Q29uZmVzc2luZyB0aGUgdHJ1dGggc2VlbWVkIHRvIF9fXyBoaW0gb2YgdGhlIGd1aWx0IGhlIGhhZCBjYXJyaWVkIGZvciB5ZWFycy4=","o":["ZW1lcmdl","YWRtb25pc2g=","YWJzb2x2ZQ==","cmVuZGVy"],"c":"YWJzb2x2ZQ=="}]},{"w":"Impunity","q":[{"s":"VGhlIGNvcnJ1cHQgb2ZmaWNpYWwgYWN0ZWQgd2l0aCBfX18sIGtub3dpbmcgbm8gb25lIHdvdWxkIGRhcmUgaG9sZCBoaW0gYWNjb3VudGFibGUu","o":["bWF4aW0=","ZXVwaGVtaXNt","aW1wdW5pdHk=","cmVzb2x1dGlvbg=="],"c":"aW1wdW5pdHk="},{"s":"QnVsbGllcyBvZnRlbiBvcGVyYXRlIHdpdGggX19fIHdoZW4gYWR1bHRzIGZhaWwgdG8gc3RlcCBpbi4=","o":["ZXhpbGU=","cGFyYWxsZWxpc20=","ZmF0ZQ==","aW1wdW5pdHk="],"c":"aW1wdW5pdHk="}]},{"w":"Reproachful","q":[{"s":"U2hlIGdhdmUgaGltIGEgX19fIGxvb2sgYWZ0ZXIgaGUgaW50ZXJydXB0ZWQgaGVyIGZvciB0aGUgdGhpcmQgdGltZS4=","o":["bW9yb3Nl","c2FuY3RpbW9uaW91cw==","cmVwcm9hY2hmdWw=","Z2xhcmluZw=="],"c":"cmVwcm9hY2hmdWw="},{"s":"VGhlIGNvYWNoJ3MgX19fIHRvbmUgbWFkZSBpdCBjbGVhciBoZSB3YXMgZGlzYXBwb2ludGVkIGluIHRoZSB0ZWFtJ3MgZWZmb3J0Lg==","o":["c2FuY3RpbW9uaW91cw==","dmlnaWxhbnQ=","b2JzdGluYXRl","cmVwcm9hY2hmdWw="],"c":"cmVwcm9hY2hmdWw="}]},{"w":"Irrevocably","q":[{"s":"T25jZSB0aGUgbWVzc2FnZSB3YXMgc2VudCwgdGhlaXIgZnJpZW5kc2hpcCB3YXMgX19fIGNoYW5nZWQu","o":["aXJyZXZvY2FibHk=","ZW5taXR5","Y3Vyc29yeQ==","Y291cA=="],"c":"aXJyZXZvY2FibHk="},{"s":"VGhlIGRlY2lzaW9uIF9fXyBhbHRlcmVkIHRoZSBjb3Vyc2Ugb2YgaGlzIGNhcmVlci4=","o":["YWxsdXNpb24=","cmV2ZXJlbmNl","aXJyZXZvY2FibHk=","Y2Vuc3VyZQ=="],"c":"aXJyZXZvY2FibHk="}]},{"w":"Foreboding","q":[{"s":"QSBzZW5zZSBvZiBfX18gZmlsbGVkIHRoZSByb29tIGFzIHRoZSBzdG9ybSBjbG91ZHMgZ2F0aGVyZWQgb3V0c2lkZS4=","o":["aW50cmljYWN5","Zm9yZWJvZGluZw==","cmV2ZXJlbmNl","YWxsdXNpb24="],"c":"Zm9yZWJvZGluZw=="},{"s":"VGhlIGRhcmssIGVtcHR5IGhhbGx3YXkgZ2F2ZSBoZXIgYSBfX18gZmVlbGluZyBzaGUgY291bGRuJ3Qgc2hha2Uu","o":["Zm9yZWJvZGluZw==","YWxsdXNpb24=","ZXBpcGhhbnk=","YW5hcGhvcmE="],"c":"Zm9yZWJvZGluZw=="}]},{"w":"Catharsis","q":[{"s":"V3JpdGluZyBpbiBoZXIgam91cm5hbCBlYWNoIG5pZ2h0IHByb3ZpZGVkIHRoZSBlbW90aW9uYWwgX19fIHNoZSBuZWVkZWQu","o":["cmVzb2x1dGlvbg==","aW5kaWduYXRpb24=","cmV0cmlidXRpb24=","Y2F0aGFyc2lz"],"c":"Y2F0aGFyc2lz"},{"s":"VGhlIGF1ZGllbmNlIGV4cGVyaWVuY2VkIGEgcG93ZXJmdWwgX19fIGFzIHRoZSB0cmFnZWR5IHJlYWNoZWQgaXRzIGNvbmNsdXNpb24u","o":["bWF4aW0=","Y2F0aGFyc2lz","ZXBpc3Ryb3BoZQ==","Zm9yZWJvZGluZw=="],"c":"Y2F0aGFyc2lz"}]},{"w":"Coup","q":[{"s":"VGhlIGdlbmVyYWwncyBibG9vZGxlc3MgX19fIHJlcGxhY2VkIHRoZSBnb3Zlcm5tZW50IG92ZXJuaWdodC4=","o":["ZWRpY3Q=","Y291cA==","aHVicmlz","cmV2ZXJlbmNl"],"c":"Y291cA=="},{"s":"TGFuZGluZyB0aGUgY2VsZWJyaXR5IGludGVydmlldyB3YXMgY29uc2lkZXJlZCBhIG1ham9yIGpvdXJuYWxpc3RpYyBfX18u","o":["Y291cA==","YW5hcGhvcmE=","Y2F0aGFyc2lz","aW5kaWduYXRpb24="],"c":"Y291cA=="}]},{"w":"Nuance","q":[{"s":"QSBza2lsbGVkIHRyYW5zbGF0b3IgY2FwdHVyZXMgZXZlcnkgX19fIG9mIG1lYW5pbmcgaW4gdGhlIG9yaWdpbmFsIHRleHQu","o":["bnVhbmNl","anV4dGFwb3NpdGlvbg==","ZXVwaGVtaXNt","ZmF0ZQ=="],"c":"bnVhbmNl"},{"s":"VGhlIHBhaW50aW5nJ3MgYmVhdXR5IGxpZXMgaW4gdGhlIHN1YnRsZSBfX18gb2YgY29sb3IgYW5kIHNoYWRvdy4=","o":["ZXBpc3Ryb3BoZQ==","YW5hcGhvcmE=","bnVhbmNl","c292ZXJlaWdudHk="],"c":"bnVhbmNl"}]},{"w":"Trepidation","q":[{"s":"U2hlIGFwcHJvYWNoZWQgdGhlIHByaW5jaXBhbCdzIG9mZmljZSB3aXRoIGdyZWF0IF9fXywgdW5zdXJlIG9mIHdoYXQgYXdhaXRlZCBoZXIu","o":["dHJlcGlkYXRpb24=","ZmF0ZQ==","ZWRpY3Q=","bWF4aW0="],"c":"dHJlcGlkYXRpb24="},{"s":"SGUgc3RlcHBlZCBvbnRvIHRoZSBzdGFnZSB3aXRoIG9idmlvdXMgX19fLCBoaXMgaGFuZHMgc2hha2luZyBzbGlnaHRseS4=","o":["dHJlcGlkYXRpb24=","YWZmbGljdGlvbg==","YW5hcGhvcmE=","aW5kaWduYXRpb24="],"c":"dHJlcGlkYXRpb24="}]},{"w":"Morose","q":[{"s":"RXZlciBzaW5jZSBsb3NpbmcgdGhlIGNoYW1waW9uc2hpcCwgaGUgaGFkIGJlZW4gX19fIGFuZCB3aXRoZHJhd24u","o":["c29yZGlk","dHJlYWNoZXJvdXM=","bW9yb3Nl","cHJvdmluY2lhbA=="],"c":"bW9yb3Nl"},{"s":"SGVyIF9fXyBleHByZXNzaW9uIHRvbGQgZXZlcnlvbmUgdGhlIG5ld3MgaGFkIG5vdCBiZWVuIGdvb2Qu","o":["dW5hZHVsdGVyYXRlZA==","bW9yb3Nl","cHJvdmluY2lhbA==","dHJlYWNoZXJvdXM="],"c":"bW9yb3Nl"}]},{"w":"Imminent","q":[{"s":"V2l0aCBkYXJrIGNsb3VkcyByb2xsaW5nIGluLCB0aGUgc3Rvcm0gc2VlbWVkIF9fXy4=","o":["aW1taW5lbnQ=","YWZmbHVlbnQ=","YW1wbGU=","bHVtaW5vdXM="],"c":"aW1taW5lbnQ="},{"s":"VGhlIENFTyB3YXJuZWQgZW1wbG95ZWVzIG9mIF9fXyBjaGFuZ2VzIHRvIHRoZSBjb21wYW55J3Mgc3RydWN0dXJlLg==","o":["dHJlYWNoZXJvdXM=","YWN1dGU=","bW9yb3Nl","aW1taW5lbnQ="],"c":"aW1taW5lbnQ="}]},{"w":"Luminous","q":[{"s":"VGhlIGZ1bGwgbW9vbiBjYXN0IGEgX19fIGdsb3cgYWNyb3NzIHRoZSBsYWtlLg==","o":["c2FuY3RpbW9uaW91cw==","aW1taW5lbnQ=","c29yZGlk","bHVtaW5vdXM="],"c":"bHVtaW5vdXM="},{"s":"SGVyIF9fXyBzbWlsZSBsaXQgdXAgdGhlIGVudGlyZSByb29tLg==","o":["YWZmbHVlbnQ=","YWxvb2Y=","bHVtaW5vdXM=","bW9yb3Nl"],"c":"bHVtaW5vdXM="}]},{"w":"Demeanor","q":[{"s":"RGVzcGl0ZSB0aGUgY2hhb3MgYXJvdW5kIGhpbSwgaGlzIGNhbG0gX19fIG5ldmVyIHdhdmVyZWQu","o":["emVhbA==","YWxsdXNpb24=","ZWRpY3Q=","ZGVtZWFub3I="],"c":"ZGVtZWFub3I="},{"s":"VGhlIGludGVydmlld2VyJ3MgZnJpZW5kbHkgX19fIGhlbHBlZCB0aGUgY2FuZGlkYXRlIHJlbGF4Lg==","o":["aHVicmlz","ZGVtZWFub3I=","bWF4aW0=","YWZmbGljdGlvbg=="],"c":"ZGVtZWFub3I="}]},{"w":"Chastise","q":[{"s":"VGhlIHRlYWNoZXIgaGFkIHRvIF9fXyB0aGUgc3R1ZGVudHMgZm9yIHRhbGtpbmcgZHVyaW5nIHRoZSBleGFtLg==","o":["cmVwdWRpYXRlZA==","Y2hhc3Rpc2U=","ZXhwb3VuZA==","ZW1lcmdl"],"c":"Y2hhc3Rpc2U="},{"s":"TXkgZ3JhbmRtb3RoZXIgd291bGQgZ2VudGx5IF9fXyBtZSB3aGVuZXZlciBJIGZvcmdvdCBteSBtYW5uZXJzLg==","o":["cmVwdWRpYXRlZA==","Y29uY3Vy","cmVuZGVy","Y2hhc3Rpc2U="],"c":"Y2hhc3Rpc2U="}]},{"w":"Affable","q":[{"s":"VGhlIG5ldyBuZWlnaGJvciB3YXMgc28gX19fIHRoYXQgZXZlcnlvbmUgb24gdGhlIGJsb2NrIGluc3RhbnRseSBsaWtlZCBoaW0u","o":["YWZmYWJsZQ==","Y3Vyc29yeQ==","YWN1dGU=","b2JzdGluYXRl"],"c":"YWZmYWJsZQ=="},{"s":"SGVyIF9fXyBtYW5uZXIgbWFkZSBjdXN0b21lcnMgZmVlbCB3ZWxjb21lIHRoZSBtb21lbnQgdGhleSBlbnRlcmVkLg==","o":["dW5zY3J1cHVsb3Vz","YW1wbGU=","YWZmYWJsZQ==","dW5hZHVsdGVyYXRlZA=="],"c":"YWZmYWJsZQ=="}]},{"w":"Cursory","q":[{"s":"SGUgZ2F2ZSB0aGUgcmVwb3J0IG9ubHkgYSBfX18gZ2xhbmNlIGJlZm9yZSBzaWduaW5nIGl0Lg==","o":["Y3Vyc29yeQ==","c29yZGlk","dmlnaWxhbnQ=","aW1taW5lbnQ="],"c":"Y3Vyc29yeQ=="},{"s":"QSBfX18gaW5zcGVjdGlvbiBvZiB0aGUgY2FyIG1pc3NlZCB0aGUgc2VyaW91cyBkYW1hZ2UgdW5kZXJuZWF0aC4=","o":["YWZmYWJsZQ==","Y3Vyc29yeQ==","dHJlYWNoZXJvdXM=","dml2YWNpb3Vz"],"c":"Y3Vyc29yeQ=="}]},{"w":"Atone","q":[{"s":"SGUgc3BlbnQgeWVhcnMgdHJ5aW5nIHRvIF9fXyBmb3IgdGhlIG1pc3Rha2VzIG9mIGhpcyB5b3V0aC4=","o":["ZW1lcmdl","Y29uY3Vy","YXRvbmU=","ZXhwb3VuZA=="],"c":"YXRvbmU="},{"s":"U2hlIHZvbHVudGVlcmVkIGF0IHRoZSBzaGVsdGVyIHRvIF9fXyBmb3IgaGVyIHBhc3Qgc2VsZmlzaG5lc3Mu","o":["YXRvbmU=","Y29uY3Vy","cmVwdWRpYXRlZA==","YWRtb25pc2g="],"c":"YXRvbmU="}]},{"w":"Affluent","q":[{"s":"VGhleSBtb3ZlZCB0byBhbiBfX18gbmVpZ2hib3Job29kIHdpdGggbWFuaWN1cmVkIGxhd25zIGFuZCBsdXh1cnkgY2Fycy4=","o":["cmVwcm9hY2hmdWw=","YWZmbHVlbnQ=","cHJvdmluY2lhbA==","YWxvb2Y="],"c":"YWZmbHVlbnQ="},{"s":"RGVzcGl0ZSBoZXIgX19fIHVwYnJpbmdpbmcsIHNoZSBjaG9zZSBhIG1vZGVzdCBsaWZlc3R5bGUu","o":["ZmxlZXRpbmc=","YWZmbHVlbnQ=","c29yZGlk","Z2xhcmluZw=="],"c":"YWZmbHVlbnQ="}]},{"w":"Unscrupulous","q":[{"s":"VGhlIF9fXyBzYWxlc21hbiBsaWVkIGFib3V0IHRoZSB3YXJyYW50eSB0byBjbG9zZSB0aGUgZGVhbC4=","o":["dHJlYWNoZXJvdXM=","YWxvb2Y=","dW5zY3J1cHVsb3Vz","bW9yb3Nl"],"c":"dW5zY3J1cHVsb3Vz"},{"s":"SW52ZXN0b3JzIGxvc3QgZXZlcnl0aGluZyB0byBhbiBfX18gYnJva2VyIHdobyBmYWxzaWZpZWQgdGhlIHJlY29yZHMu","o":["YWxvb2Y=","bHVtaW5vdXM=","YWZmbHVlbnQ=","dW5zY3J1cHVsb3Vz"],"c":"dW5zY3J1cHVsb3Vz"}]},{"w":"Render","q":[{"s":"VGhlIGluanVyeSB3b3VsZCBfX18gaGltIHVuYWJsZSB0byBwbGF5IGZvciB0aGUgcmVzdCBvZiB0aGUgc2Vhc29uLg==","o":["YWJzb2x2ZQ==","cmVuZGVy","Y2Vuc3VyZQ==","YWRtb25pc2g="],"c":"cmVuZGVy"},{"s":"VGhlIGJsaXp6YXJkIHdvdWxkIF9fXyB0aGUgcm9hZHMgY29tcGxldGVseSBpbXBhc3NhYmxlLg==","o":["ZW1lcmdl","cmVuZGVy","YWRtb25pc2g=","ZXhwb3VuZA=="],"c":"cmVuZGVy"}]},{"w":"Disdain","q":[{"s":"U2hlIGxvb2tlZCBhdCB0aGUgY2hlYXAgaW1pdGF0aW9uIHdpdGggb2J2aW91cyBfX18u","o":["dHJlcGlkYXRpb24=","cGFyYWxsZWxpc20=","ZGlzZGFpbg==","Y2F0aGFyc2lz"],"c":"ZGlzZGFpbg=="},{"s":"SGlzIF9fXyBmb3Igc21hbGwgdGFsayBtYWRlIGhpbSBzZWVtIHVuZnJpZW5kbHkgYXQgcGFydGllcy4=","o":["YW5hcGhvcmE=","aW5kaWduYXRpb24=","ZGlzZGFpbg==","Y291cA=="],"c":"ZGlzZGFpbg=="}]},{"w":"Affliction","q":[{"s":"VGhlIHJhcmUgX19fIGxlZnQgaGVyIGJlZHJpZGRlbiBmb3IgbW9zdCBvZiB0aGUgd2ludGVyLg==","o":["YWZmbGljdGlvbg==","ZXBpcGhhbnk=","cmV0cmlidXRpb24=","Zm9yZWJvZGluZw=="],"c":"YWZmbGljdGlvbg=="},{"s":"TG9uZWxpbmVzcyB3YXMgYSBxdWlldCBfX18gdGhhdCBmb2xsb3dlZCBoaW0gaW50byBvbGQgYWdlLg==","o":["cmV2ZXJlbmNl","cmV0cmlidXRpb24=","ZXBpcGhhbnk=","YWZmbGljdGlvbg=="],"c":"YWZmbGljdGlvbg=="}]},{"w":"Obstinate","q":[{"s":"VGhlIF9fXyBtdWxlIHJlZnVzZWQgdG8gbW92ZSBubyBtYXR0ZXIgaG93IGhhcmQgd2UgcHVsbGVkLg==","o":["dmlnaWxhbnQ=","cmVwcm9hY2hmdWw=","b2JzdGluYXRl","YWZmYWJsZQ=="],"c":"b2JzdGluYXRl"},{"s":"SGVyIF9fXyByZWZ1c2FsIHRvIGNvbXByb21pc2UgZXZlbnR1YWxseSBjb3N0IGhlciB0aGUgZGVhbC4=","o":["b2JzdGluYXRl","Y3Vyc29yeQ==","YW1wbGU=","bW9yb3Nl"],"c":"b2JzdGluYXRl"}]},{"w":"Glaring","q":[{"s":"VGhlcmUgd2FzIGEgX19fIGVycm9yIG9uIHRoZSBmaXJzdCBwYWdlIG9mIHRoZSByZXBvcnQu","o":["dmlnaWxhbnQ=","ZmxlZXRpbmc=","Z2xhcmluZw==","YWZmbHVlbnQ="],"c":"Z2xhcmluZw=="},{"s":"VGhlIF9fXyBvbWlzc2lvbiBpbiBoaXMgdGVzdGltb255IGNhdWdodCB0aGUgbGF3eWVyJ3MgYXR0ZW50aW9uIGltbWVkaWF0ZWx5Lg==","o":["b2JzdGluYXRl","dW5hZHVsdGVyYXRlZA==","aW1taW5lbnQ=","Z2xhcmluZw=="],"c":"Z2xhcmluZw=="}]},{"w":"Intricacy","q":[{"s":"VGhlIF9fXyBvZiB0aGUgd2F0Y2gncyBpbm5lciB3b3JraW5ncyBpbXByZXNzZWQgZXZlbiBzZWFzb25lZCBlbmdpbmVlcnMu","o":["emVhbA==","aW50cmljYWN5","anV4dGFwb3NpdGlvbg==","cmV2ZXJlbmNl"],"c":"aW50cmljYWN5"},{"s":"U2hlIG1hcnZlbGVkIGF0IHRoZSBfX18gb2YgdGhlIGhhbmQtd292ZW4gdGFwZXN0cnku","o":["aW50cmljYWN5","ZWRpY3Q=","YWxsdXNpb24=","YW5hcGhvcmE="],"c":"aW50cmljYWN5"}]},{"w":"Fleeting","q":[{"s":"Q2hpbGRob29kIGlzIF9fXzsgb25lIGRheSB5b3UgYmxpbmsgYW5kIGl0J3MgZ29uZS4=","o":["ZmxlZXRpbmc=","YWZmbHVlbnQ=","aW1taW5lbnQ=","cHJvdmluY2lhbA=="],"c":"ZmxlZXRpbmc="},{"s":"U2hlIGNhdWdodCBhIF9fXyBnbGltcHNlIG9mIGhpbSB0aHJvdWdoIHRoZSBjcm93ZCBiZWZvcmUgaGUgZGlzYXBwZWFyZWQu","o":["Y29tcGxhY2VudA==","ZmxlZXRpbmc=","dHJlYWNoZXJvdXM=","aW1taW5lbnQ="],"c":"ZmxlZXRpbmc="}]},{"w":"Enmity","q":[{"s":"VGhlIF9fXyBiZXR3ZWVuIHRoZSB0d28gZmFtaWxpZXMgd2VudCBiYWNrIGdlbmVyYXRpb25zLg==","o":["ZXBpc3Ryb3BoZQ==","ZW5taXR5","YWxsdXNpb24=","c292ZXJlaWdudHk="],"c":"ZW5taXR5"},{"s":"VGhlcmUgd2FzIGNsZWFyIF9fXyBpbiBoaXMgZXllcyB3aGVuZXZlciBoaXMgcml2YWwgZW50ZXJlZCB0aGUgcm9vbS4=","o":["ZW5taXR5","Zm9yZWJvZGluZw==","ZmF0ZQ==","YWZmbGljdGlvbg=="],"c":"ZW5taXR5"}]},{"w":"Vivacious","q":[{"s":"SGVyIF9fXyBwZXJzb25hbGl0eSBtYWRlIGhlciB0aGUgY2VudGVyIG9mIGV2ZXJ5IGdhdGhlcmluZy4=","o":["YWN1dGU=","bHVtaW5vdXM=","dml2YWNpb3Vz","aW1taW5lbnQ="],"c":"dml2YWNpb3Vz"},{"s":"VGhlIF9fXyBob3N0IGtlcHQgdGhlIGNvbnZlcnNhdGlvbiBmbG93aW5nIGFsbCBldmVuaW5nLg==","o":["cHJvdmluY2lhbA==","dml2YWNpb3Vz","dW5zY3J1cHVsb3Vz","dHJlYWNoZXJvdXM="],"c":"dml2YWNpb3Vz"}]},{"w":"Expound","q":[{"s":"VGhlIHByb2Zlc3NvciBiZWdhbiB0byBfX18gb24gdGhlIHRoZW9yeSBmb3Igb3ZlciBhbiBob3VyLg==","o":["ZXhwb3VuZA==","cmVwdWRpYXRlZA==","Y2Vuc3VyZQ==","Y2hhc3Rpc2U="],"c":"ZXhwb3VuZA=="},{"s":"SGUgYXNrZWQgaGVyIHRvIF9fXyBmdXJ0aGVyIG9uIGhlciBwcm9wb3NhbCBkdXJpbmcgdGhlIG1lZXRpbmcu","o":["Y2Vuc3VyZQ==","YXRvbmU=","Y29uY3Vy","ZXhwb3VuZA=="],"c":"ZXhwb3VuZA=="}]},{"w":"Resolution","q":[{"s":"U2hlIG1hZGUgYSBOZXcgWWVhcidzIF9fXyB0byBleGVyY2lzZSB0aHJlZSB0aW1lcyBhIHdlZWsu","o":["Y2F0aGFyc2lz","cmVzb2x1dGlvbg==","ZXBpcGhhbnk=","bWF4aW0="],"c":"cmVzb2x1dGlvbg=="},{"s":"RGVzcGl0ZSB0aGUgc2V0YmFja3MsIGhpcyBfX18gdG8gZmluaXNoIHRoZSBtYXJhdGhvbiBuZXZlciB3YXZlcmVkLg==","o":["aW1wdW5pdHk=","ZXBpc3Ryb3BoZQ==","cmVzb2x1dGlvbg==","Zm9yZWJvZGluZw=="],"c":"cmVzb2x1dGlvbg=="}]},{"w":"Acute","q":[{"s":"SGUgZmVsdCBhbiBfX18gcGFpbiBpbiBoaXMgc2lkZSBhZnRlciB0aGUgZmFsbC4=","o":["dW5hZHVsdGVyYXRlZA==","YWN1dGU=","c2FuY3RpbW9uaW91cw==","Z2xhcmluZw=="],"c":"YWN1dGU="},{"s":"SGVyIF9fXyBzZW5zZSBvZiBzbWVsbCBoZWxwZWQgaGVyIGlkZW50aWZ5IHRoZSBzcGljZSBpbW1lZGlhdGVseS4=","o":["YWN1dGU=","c29yZGlk","dW5hZHVsdGVyYXRlZA==","dHJlYWNoZXJvdXM="],"c":"YWN1dGU="}]},{"w":"Maxim","q":[{"s":"SGUgbGl2ZWQgYnkgdGhlIF9fXyB0aGF0IGhvbmVzdHkgaXMgYWx3YXlzIHRoZSBiZXN0IHBvbGljeS4=","o":["emVhbA==","bWF4aW0=","aW50cmljYWN5","YWZmbGljdGlvbg=="],"c":"bWF4aW0="},{"s":"VGhlIG9sZCBfX18gImhhc3RlIG1ha2VzIHdhc3RlIiBwcm92ZWQgdHJ1ZSBvbmNlIGFnYWluLg==","o":["bWF4aW0=","cmV0cmlidXRpb24=","Y2F0aGFyc2lz","aW50cmljYWN5"],"c":"bWF4aW0="}]},{"w":"Emerge","q":[{"s":"QWZ0ZXIgaG91cnMgb2Ygc2VhcmNoaW5nLCBuZXcgY2x1ZXMgYmVnYW4gdG8gX19fIGZyb20gdGhlIGV2aWRlbmNlLg==","o":["Y2hhc3Rpc2U=","YWRtb25pc2g=","ZW1lcmdl","cmVwdWRpYXRlZA=="],"c":"ZW1lcmdl"},{"s":"VGhlIGhpa2VycyB3ZXJlIHJlbGlldmVkIHRvIF9fXyBmcm9tIHRoZSBkZW5zZSBmb3Jlc3QganVzdCBiZWZvcmUgc3Vuc2V0Lg==","o":["ZW1lcmdl","Y29uY3Vy","YXRvbmU=","Y2hhc3Rpc2U="],"c":"ZW1lcmdl"}]},{"w":"Aloof","q":[{"s":"VGhlIG5ldyBzdHVkZW50IHJlbWFpbmVkIF9fXywgc2l0dGluZyBhbG9uZSBhdCBsdW5jaCBldmVyeSBkYXku","o":["b2JzdGluYXRl","dml2YWNpb3Vz","YWxvb2Y=","Y29tcGxhY2VudA=="],"c":"YWxvb2Y="},{"s":"SGUga2VwdCBfX18gZnJvbSBvZmZpY2UgZ29zc2lwIGFuZCBwb2xpdGljcy4=","o":["Y29tcGxhY2VudA==","Y3Vyc29yeQ==","YWxvb2Y=","YWN1dGU="],"c":"YWxvb2Y="}]},{"w":"Sordid","q":[{"s":"VGhlIHRhYmxvaWQgcHVibGlzaGVkIGV2ZXJ5IF9fXyBkZXRhaWwgb2YgdGhlIHNjYW5kYWwu","o":["ZmxlZXRpbmc=","cmVwcm9hY2hmdWw=","c29yZGlk","dmlnaWxhbnQ="],"c":"c29yZGlk"},{"s":"QmVoaW5kIHRoZSBwb2xpc2hlZCBpbWFnZSBsYXkgYSBfX18gaGlzdG9yeSBvZiBjb3JydXB0aW9uLg==","o":["c29yZGlk","YWZmYWJsZQ==","YW1wbGU=","bHVtaW5vdXM="],"c":"c29yZGlk"}]},{"w":"Indignation","q":[{"s":"U2hlIGZpbGxlZCB3aXRoIF9fXyB3aGVuIHNoZSBoZWFyZCBob3cgdGhlIGVtcGxveWVlcyBoYWQgYmVlbiB0cmVhdGVkLg==","o":["aW1wdW5pdHk=","aHVicmlz","aW5kaWduYXRpb24=","ZXhpbGU="],"c":"aW5kaWduYXRpb24="},{"s":"SGlzIF9fXyBhdCB0aGUgdW5mYWlyIHJ1bGluZyB3YXMgdmlzaWJsZSB0byBldmVyeW9uZSBpbiB0aGUgY291cnRyb29tLg==","o":["cmV0cmlidXRpb24=","aW5kaWduYXRpb24=","aW1wdW5pdHk=","b3h5bW9yb24="],"c":"aW5kaWduYXRpb24="}]},{"w":"Retribution","q":[{"s":"VGhlIHZpbGxhZ2VycyBzb3VnaHQgX19fIGZvciB0aGUgZGVzdHJ1Y3Rpb24gY2F1c2VkIGJ5IHRoZSByYWlkZXJzLg==","o":["ZXhpbGU=","cmV0cmlidXRpb24=","YW5hcGhvcmE=","anV4dGFwb3NpdGlvbg=="],"c":"cmV0cmlidXRpb24="},{"s":"SGUgYmVsaWV2ZWQgdGhlIHN0b3JtIHdhcyBkaXZpbmUgX19fIGZvciB0aGUgdG93bidzIHdpY2tlZG5lc3Mu","o":["cmV0cmlidXRpb24=","ZWRpY3Q=","YWxsdXNpb24=","dHJlcGlkYXRpb24="],"c":"cmV0cmlidXRpb24="}]},{"w":"Treacherous","q":[{"s":"VGhlIG1vdW50YWluIHBhc3MgYmVjYW1lIF9fXyBhZnRlciB0aGUgaWNlIHN0b3JtLg==","o":["dW5hZHVsdGVyYXRlZA==","c29yZGlk","dHJlYWNoZXJvdXM=","aW1taW5lbnQ="],"c":"dHJlYWNoZXJvdXM="},{"s":"SGUgd2FzIGJldHJheWVkIGJ5IGEgX19fIGZyaWVuZCBoZSBoYWQgdHJ1c3RlZCBmb3IgeWVhcnMu","o":["YWZmYWJsZQ==","c29yZGlk","aW1taW5lbnQ=","dHJlYWNoZXJvdXM="],"c":"dHJlYWNoZXJvdXM="}]},{"w":"Censure","q":[{"s":"VGhlIHNlbmF0b3IgZmFjZWQgcHVibGljIF9fXyBmb3IgaGlzIGluYXBwcm9wcmlhdGUgY29tbWVudHMu","o":["YWJzb2x2ZQ==","YXRvbmU=","Y2Vuc3VyZQ==","ZW1lcmdl"],"c":"Y2Vuc3VyZQ=="},{"s":"VGhlIGNvbW1pdHRlZSB2b3RlZCB0byBmb3JtYWxseSBfX18gdGhlIG9mZmljaWFsIGZvciBtaXNjb25kdWN0Lg==","o":["cmVuZGVy","Y2Vuc3VyZQ==","YXRvbmU=","Y29uY3Vy"],"c":"Y2Vuc3VyZQ=="}]},{"w":"Edict","q":[{"s":"VGhlIGtpbmcgaXNzdWVkIGFuIF9fXyBiYW5uaW5nIGFsbCBmb3JlaWduIHRyYWRlLg==","o":["YW5hcGhvcmE=","aHVicmlz","ZWRpY3Q=","bWF4aW0="],"c":"ZWRpY3Q="},{"s":"Qnkgcm95YWwgX19fLCB0aGUgZmVzdGl2YWwgd2FzIHRvIGJlIGhlbGQgZXZlcnkgc3ByaW5nLg==","o":["YWZmbGljdGlvbg==","cmVzb2x1dGlvbg==","ZWRpY3Q=","Zm9yZWJvZGluZw=="],"c":"ZWRpY3Q="}]},{"w":"Fate","q":[{"s":"U2hlIGJlbGlldmVkIGl0IHdhcyBfX18gdGhhdCBicm91Z2h0IHRoZW0gdG9nZXRoZXIgYXQgdGhlIGFpcnBvcnQu","o":["ZGlzZGFpbg==","ZmF0ZQ==","bnVhbmNl","ZW5taXR5"],"c":"ZmF0ZQ=="},{"s":"VGhlIGhlcm8gY291bGQgbm90IGVzY2FwZSB0aGUgX19fIHRoYXQgaGFkIGJlZW4gd3JpdHRlbiBmb3IgaGltLg==","o":["anV4dGFwb3NpdGlvbg==","ZmF0ZQ==","cmV0cmlidXRpb24=","aW5kaWduYXRpb24="],"c":"ZmF0ZQ=="}]},{"w":"Hubris","q":[{"s":"SGlzIF9fXyBsZWQgaGltIHRvIGlnbm9yZSB0aGUgd2FybmluZ3MgYW5kIGF0dGVtcHQgdGhlIGNsaW1iIGFueXdheS4=","o":["aHVicmlz","b3h5bW9yb24=","bWF4aW0=","YWZmbGljdGlvbg=="],"c":"aHVicmlz"},{"s":"TWFueSBHcmVlayB0cmFnZWRpZXMgY2VudGVyIG9uIGEgaGVybyBicm91Z2h0IGRvd24gYnkgaGlzIG93biBfX18u","o":["aHVicmlz","aW50cmljYWN5","aW5kaWduYXRpb24=","bnVhbmNl"],"c":"aHVicmlz"}]},{"w":"Reverence","q":[{"s":"VGhlIHBpbGdyaW1zIGFwcHJvYWNoZWQgdGhlIHNocmluZSB3aXRoIGRlZXAgX19fLg==","o":["cmV2ZXJlbmNl","cmV0cmlidXRpb24=","ZWRpY3Q=","aW5kaWduYXRpb24="],"c":"cmV2ZXJlbmNl"},{"s":"U2hlIHNwb2tlIG9mIGhlciBsYXRlIG1lbnRvciB3aXRoIHF1aWV0IF9fXy4=","o":["ZXVwaGVtaXNt","cmV2ZXJlbmNl","Y2F0aGFyc2lz","ZWRpY3Q="],"c":"cmV2ZXJlbmNl"}]},{"w":"Sovereignty","q":[{"s":"VGhlIHNtYWxsIG5hdGlvbiBmb3VnaHQgYSBsb25nIHdhciB0byBwcmVzZXJ2ZSBpdHMgX19fLg==","o":["ZWRpY3Q=","ZXVwaGVtaXNt","c292ZXJlaWdudHk=","ZGlzZGFpbg=="],"c":"c292ZXJlaWdudHk="},{"s":"VGhlIHRyZWF0eSByZWNvZ25pemVkIHRoZSB0cmliZSdzIF9fXyBvdmVyIHRoZSBhbmNlc3RyYWwgbGFuZHMu","o":["c292ZXJlaWdudHk=","Y2F0aGFyc2lz","b3h5bW9yb24=","YW5hcGhvcmE="],"c":"c292ZXJlaWdudHk="}]},{"w":"Exile","q":[{"s":"VGhlIGRldGhyb25lZCBraW5nIHdhcyBzZW50IGludG8gX19fIG9uIGEgZGlzdGFudCBpc2xhbmQu","o":["ZGVtZWFub3I=","dHJlcGlkYXRpb24=","ZXhpbGU=","ZXBpcGhhbnk="],"c":"ZXhpbGU="},{"s":"QWZ0ZXIgeWVhcnMgb2YgX19fLCB0aGUgcG9ldCB3YXMgZmluYWxseSBhbGxvd2VkIHRvIHJldHVybiBob21lLg==","o":["ZXhpbGU=","Zm9yZWJvZGluZw==","aW5kaWduYXRpb24=","ZXBpc3Ryb3BoZQ=="],"c":"ZXhpbGU="}]},{"w":"Vigilant","q":[{"s":"UGFyZW50cyBtdXN0IHJlbWFpbiBfX18gd2hlbiB0aGVpciBjaGlsZHJlbiBhcmUgcGxheWluZyBuZWFyIHdhdGVyLg==","o":["c2FuY3RpbW9uaW91cw==","dml2YWNpb3Vz","dmlnaWxhbnQ=","b2JzdGluYXRl"],"c":"dmlnaWxhbnQ="},{"s":"VGhlIGd1YXJkIHN0YXllZCBfX18gdGhyb3VnaG91dCB0aGUgbG9uZyBuaWdodCBzaGlmdC4=","o":["bHVtaW5vdXM=","dHJlYWNoZXJvdXM=","dmlnaWxhbnQ=","dW5hZHVsdGVyYXRlZA=="],"c":"dmlnaWxhbnQ="}]},{"w":"Zeal","q":[{"s":"U2hlIHRhY2tsZWQgaGVyIG5ldyBqb2Igd2l0aCB0aGUgX19fIG9mIHNvbWVvbmUgd2hvIGhhZCBmb3VuZCBoZXIgY2FsbGluZy4=","o":["ZW5taXR5","emVhbA==","YW5hcGhvcmE=","bnVhbmNl"],"c":"emVhbA=="},{"s":"SGlzIF9fXyBmb3IgZW52aXJvbm1lbnRhbCBjYXVzZXMgaW5zcGlyZWQgb3RoZXJzIHRvIHZvbHVudGVlci4=","o":["emVhbA==","ZXhpbGU=","ZW5taXR5","ZmF0ZQ=="],"c":"emVhbA=="}]},{"w":"Provincial","q":[{"s":"SGlzIF9fXyBhdHRpdHVkZXMgc2VlbWVkIG91dCBvZiBwbGFjZSBpbiB0aGUgY29zbW9wb2xpdGFuIGNpdHku","o":["YWZmYWJsZQ==","cHJvdmluY2lhbA==","dmlnaWxhbnQ=","dHJlYWNoZXJvdXM="],"c":"cHJvdmluY2lhbA=="},{"s":"U2hlIGZvdW5kIHRoZSB0b3duIGNoYXJtaW5nIGJ1dCBhIGJpdCB0b28gX19fIGZvciBoZXIgdGFzdGUu","o":["bW9yb3Nl","YWZmbHVlbnQ=","Y29tcGxhY2VudA==","cHJvdmluY2lhbA=="],"c":"cHJvdmluY2lhbA=="}]},{"w":"Admonish","q":[{"s":"VGhlIGNvYWNoIGhhZCB0byBfX18gdGhlIHRlYW0gZm9yIGFycml2aW5nIGxhdGUgdG8gcHJhY3RpY2Uu","o":["YWRtb25pc2g=","cmVuZGVy","YXRvbmU=","ZXhwb3VuZA=="],"c":"YWRtb25pc2g="},{"s":"U2hlIHdvdWxkIGdlbnRseSBfX18gaGVyIGNoaWxkcmVuIHdoZW4gdGhleSBmb3Jnb3QgdG8gc2F5IHRoYW5rIHlvdS4=","o":["ZXhwb3VuZA==","cmVwdWRpYXRlZA==","ZW1lcmdl","YWRtb25pc2g="],"c":"YWRtb25pc2g="}]},{"w":"Complacent","q":[{"s":"QWZ0ZXIgd2lubmluZyB0aGUgZmlyc3QgZmV3IGdhbWVzLCB0aGUgdGVhbSBiZWNhbWUgX19fIGFuZCBzdGFydGVkIGxvc2luZy4=","o":["bW9yb3Nl","YWZmbHVlbnQ=","aW1taW5lbnQ=","Y29tcGxhY2VudA=="],"c":"Y29tcGxhY2VudA=="},{"s":"RG9uJ3QgZ3JvdyBfX18ganVzdCBiZWNhdXNlIHRoZSBwcm9qZWN0IGlzIGdvaW5nIHdlbGwgcmlnaHQgbm93Lg==","o":["dml2YWNpb3Vz","Y29tcGxhY2VudA==","bHVtaW5vdXM=","bW9yb3Nl"],"c":"Y29tcGxhY2VudA=="}]},{"w":"Concur","q":[{"s":"SSBfX18gd2l0aCBteSBjb2xsZWFndWUncyBhc3Nlc3NtZW50IG9mIHRoZSBzaXR1YXRpb24u","o":["Y29uY3Vy","dW5kdWxhdGU=","ZXhwb3VuZA==","YWJzb2x2ZQ=="],"c":"Y29uY3Vy"},{"s":"TW9zdCBleHBlcnRzIF9fXyB0aGF0IHRoZSBwb2xpY3kgbmVlZHMgdG8gYmUgcmV2aXNlZC4=","o":["Y29uY3Vy","ZXhwb3VuZA==","YWJzb2x2ZQ==","Y2hhc3Rpc2U="],"c":"Y29uY3Vy"}]},{"w":"Repudiated","q":[{"s":"VGhlIGNhbmRpZGF0ZSBwdWJsaWNseSBfX18gdGhlIGVuZG9yc2VtZW50IGFmdGVyIHRoZSBjb250cm92ZXJzeS4=","o":["cmVwdWRpYXRlZA==","cmVuZGVy","Y29uY3Vy","YWJzb2x2ZQ=="],"c":"cmVwdWRpYXRlZA=="},{"s":"U2hlIF9fXyB0aGUgcnVtb3JzIGFib3V0IGhlciBpbnZvbHZlbWVudCBpbiB0aGUgc2NhbmRhbC4=","o":["cmVuZGVy","Y2hhc3Rpc2U=","cmVwdWRpYXRlZA==","ZXhwb3VuZA=="],"c":"cmVwdWRpYXRlZA=="}]},{"w":"Sanctimonious","q":[{"s":"SGlzIF9fXyBsZWN0dXJlcyBhYm91dCBob25lc3R5IHJhbmcgaG9sbG93IGdpdmVuIGhpcyBvd24gYmVoYXZpb3Iu","o":["dW5hZHVsdGVyYXRlZA==","cmVwcm9hY2hmdWw=","c2FuY3RpbW9uaW91cw==","YWZmbHVlbnQ="],"c":"c2FuY3RpbW9uaW91cw=="},{"s":"U2hlIHJvbGxlZCBoZXIgZXllcyBhdCBoaXMgX19fIHRvbmUgd2hlbmV2ZXIgaGUgZGlzY3Vzc2VkIGV0aGljcy4=","o":["Y29tcGxhY2VudA==","YWZmbHVlbnQ=","dml2YWNpb3Vz","c2FuY3RpbW9uaW91cw=="],"c":"c2FuY3RpbW9uaW91cw=="}]},{"w":"Allusion","q":[{"s":"VGhlIG5vdmVsIGNvbnRhaW5zIGEgY2xlYXIgX19fIHRvIFNoYWtlc3BlYXJlJ3MgSGFtbGV0IGluIGl0cyBvcGVuaW5nIHNjZW5lLg==","o":["aW1wdW5pdHk=","Y2F0aGFyc2lz","YWxsdXNpb24=","ZXBpcGhhbnk="],"c":"YWxsdXNpb24="},{"s":"SGVyIHNwZWVjaCBpbmNsdWRlZCBhIHN1YnRsZSBfX18gdG8gdGhlIGNpdmlsIHJpZ2h0cyBtb3ZlbWVudC4=","o":["YWZmbGljdGlvbg==","ZGVtZWFub3I=","YWxsdXNpb24=","ZXBpcGhhbnk="],"c":"YWxsdXNpb24="}]},{"w":"Parallelism","q":[{"s":"TGluY29sbidzIHVzZSBvZiBfX18g4oCUICJvZiB0aGUgcGVvcGxlLCBieSB0aGUgcGVvcGxlLCBmb3IgdGhlIHBlb3BsZSIg4oCUIGdpdmVzIHRoZSBwaHJhc2UgaXRzIHJoeXRobS4=","o":["ZmF0ZQ==","ZXhpbGU=","cGFyYWxsZWxpc20=","Y2F0aGFyc2lz"],"c":"cGFyYWxsZWxpc20="},{"s":"VGhlIGF1dGhvciB1c2VzIF9fXyB0byBjcmVhdGUgYmFsYW5jZWQsIG1lbW9yYWJsZSBzZW50ZW5jZXMu","o":["aW50cmljYWN5","cGFyYWxsZWxpc20=","ZW5taXR5","aHVicmlz"],"c":"cGFyYWxsZWxpc20="}]},{"w":"Juxtaposition","q":[{"s":"VGhlIGZpbG0ncyBwb3dlciBjb21lcyBmcm9tIHRoZSBfX18gb2Ygd2FydGltZSBicnV0YWxpdHkgYW5kIHF1aWV0IGRvbWVzdGljIHNjZW5lcy4=","o":["anV4dGFwb3NpdGlvbg==","aW5kaWduYXRpb24=","cmV2ZXJlbmNl","c292ZXJlaWdudHk="],"c":"anV4dGFwb3NpdGlvbg=="},{"s":"VGhlIGFydGlzdCB1c2VkIHRoZSBfX18gb2YgYnJpZ2h0IGNvbG9ycyBhbmQgZGFyayBzaGFkb3dzIHRvIGNyZWF0ZSB0ZW5zaW9uLg==","o":["emVhbA==","cmV2ZXJlbmNl","c292ZXJlaWdudHk=","anV4dGFwb3NpdGlvbg=="],"c":"anV4dGFwb3NpdGlvbg=="}]},{"w":"Euphemism","q":[{"s":"IlBhc3NlZCBhd2F5IiBpcyBhIGNvbW1vbiBfX18gZm9yICJkaWVkLiI=","o":["aW1wdW5pdHk=","ZXVwaGVtaXNt","aW50cmljYWN5","cmVzb2x1dGlvbg=="],"c":"ZXVwaGVtaXNt"},{"s":"VGhlIGNvbXBhbnkgdXNlZCB0aGUgX19fICJyaWdodHNpemluZyIgaW5zdGVhZCBvZiBhZG1pdHRpbmcgdGhleSB3ZXJlIGZpcmluZyBwZW9wbGUu","o":["ZXVwaGVtaXNt","cmV2ZXJlbmNl","dHJlcGlkYXRpb24=","aW5kaWduYXRpb24="],"c":"ZXVwaGVtaXNt"}]},{"w":"Oxymoron","q":[{"s":"VGhlIHBocmFzZSAiZGVhZmVuaW5nIHNpbGVuY2UiIGlzIGEgZmFtb3VzIF9fXy4=","o":["ZXhpbGU=","b3h5bW9yb24=","Y2F0aGFyc2lz","bWF4aW0="],"c":"b3h5bW9yb24="},{"s":"Q2FsbGluZyBpdCBhICJ3b3JraW5nIHZhY2F0aW9uIiBpcyBzb21ldGhpbmcgb2YgYW4gX19fLg==","o":["ZW5taXR5","ZWRpY3Q=","ZXhpbGU=","b3h5bW9yb24="],"c":"b3h5bW9yb24="}]},{"w":"Anaphora","q":[{"s":"RHIuIEtpbmcncyByZXBlYXRlZCAiSSBoYXZlIGEgZHJlYW0iIGlzIGEgY2xhc3NpYyBleGFtcGxlIG9mIF9fXy4=","o":["ZGlzZGFpbg==","ZXhpbGU=","cmVzb2x1dGlvbg==","YW5hcGhvcmE="],"c":"YW5hcGhvcmE="},{"s":"VGhlIHBvZXQgdXNlZCBfX18gYnkgYmVnaW5uaW5nIGVhY2ggc3RhbnphIHdpdGggdGhlIHNhbWUgcGhyYXNlLg==","o":["aW1wdW5pdHk=","YW5hcGhvcmE=","YWZmbGljdGlvbg==","ZW5taXR5"],"c":"YW5hcGhvcmE="}]},{"w":"Epistrophe","q":[{"s":"TGluY29sbidzICJvZiB0aGUgcGVvcGxlLCBieSB0aGUgcGVvcGxlLCBmb3IgdGhlIHBlb3BsZSIgaXMgYW4gZXhhbXBsZSBvZiBfX18g4oCUIHJlcGV0aXRpb24gYXQgdGhlIGVuZCBvZiBjbGF1c2VzLg==","o":["ZXBpcGhhbnk=","ZXBpc3Ryb3BoZQ==","bWF4aW0=","emVhbA=="],"c":"ZXBpc3Ryb3BoZQ=="},{"s":"V2hlbiBlYWNoIHNlbnRlbmNlIGVuZHMgd2l0aCB0aGUgc2FtZSB3b3JkIGZvciBlbXBoYXNpcywgdGhlIHdyaXRlciBpcyB1c2luZyBfX18u","o":["aW50cmljYWN5","emVhbA==","YWZmbGljdGlvbg==","ZXBpc3Ryb3BoZQ=="],"c":"ZXBpc3Ryb3BoZQ=="}]}];
+<!-- SVG sprite definitions (referenced by use elements throughout the app) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
 
-// Decode helper
+    <!-- Pixel kid at computer giving thumbs up (correct answer celebration).
+         Hand-drawn pixel art — no copyrighted material. ~32x32 grid scaled up. -->
+    <symbol id="art-thumbsup-kid" viewBox="0 0 80 80">
+      <!-- Background tile -->
+      <rect width="80" height="80" fill="#00f0ff"/>
+      <!-- Floor -->
+      <rect y="62" width="80" height="18" fill="#39ff14"/>
+      <!-- CRT Monitor body (beige) -->
+      <rect x="46" y="34" width="28" height="22" fill="#d4c896" stroke="#1a0033" stroke-width="1.5"/>
+      <!-- Monitor screen -->
+      <rect x="50" y="38" width="20" height="14" fill="#1a0033"/>
+      <!-- Screen glow content (smiley) -->
+      <rect x="54" y="42" width="2" height="2" fill="#39ff14"/>
+      <rect x="64" y="42" width="2" height="2" fill="#39ff14"/>
+      <rect x="56" y="46" width="8" height="2" fill="#39ff14"/>
+      <!-- Monitor stand -->
+      <rect x="56" y="56" width="8" height="4" fill="#a89c70"/>
+      <rect x="52" y="60" width="16" height="2" fill="#a89c70"/>
+      <!-- Desk -->
+      <rect x="40" y="62" width="40" height="3" fill="#8b5a2b"/>
+      <!-- KID - hair (brown 90s bowl cut) -->
+      <rect x="10" y="20" width="22" height="6" fill="#5c3a1f"/>
+      <rect x="8" y="22" width="26" height="6" fill="#5c3a1f"/>
+      <!-- Face (skin tone) -->
+      <rect x="12" y="26" width="18" height="14" fill="#fcd5a5"/>
+      <!-- Eyes -->
+      <rect x="16" y="30" width="2" height="2" fill="#1a0033"/>
+      <rect x="24" y="30" width="2" height="2" fill="#1a0033"/>
+      <!-- Big smile -->
+      <rect x="18" y="35" width="6" height="2" fill="#1a0033"/>
+      <rect x="16" y="34" width="2" height="1" fill="#1a0033"/>
+      <rect x="24" y="34" width="2" height="1" fill="#1a0033"/>
+      <!-- Shirt (bright striped 90s) -->
+      <rect x="8" y="40" width="26" height="20" fill="#ff2e93"/>
+      <rect x="8" y="44" width="26" height="2" fill="#ffd60a"/>
+      <rect x="8" y="50" width="26" height="2" fill="#ffd60a"/>
+      <rect x="8" y="56" width="26" height="2" fill="#ffd60a"/>
+      <!-- Raised arm (right side) - going up and out -->
+      <rect x="32" y="40" width="4" height="6" fill="#ff2e93"/>
+      <rect x="36" y="34" width="4" height="8" fill="#ff2e93"/>
+      <!-- Wrist -->
+      <rect x="36" y="30" width="6" height="4" fill="#fcd5a5"/>
+      <!-- Fist (closed hand) -->
+      <rect x="34" y="24" width="10" height="8" fill="#fcd5a5" stroke="#1a0033" stroke-width="0.5"/>
+      <!-- Knuckle lines on the fist -->
+      <rect x="36" y="26" width="6" height="1" fill="#d4a77f"/>
+      <rect x="36" y="29" width="6" height="1" fill="#d4a77f"/>
+      <!-- Thumb extended UPWARD from top of fist (sticking up) -->
+      <rect x="42" y="20" width="4" height="6" fill="#fcd5a5" stroke="#1a0033" stroke-width="0.5"/>
+      <!-- Thumb tip rounded -->
+      <rect x="43" y="19" width="2" height="1" fill="#fcd5a5"/>
+      <!-- Other arm at side -->
+      <rect x="4" y="42" width="6" height="10" fill="#ff2e93"/>
+      <rect x="4" y="50" width="4" height="4" fill="#fcd5a5"/>
+      <!-- Pants -->
+      <rect x="12" y="60" width="6" height="6" fill="#3535e0"/>
+      <rect x="22" y="60" width="6" height="6" fill="#3535e0"/>
+      <!-- Sparkle effects -->
+      <rect x="4" y="8" width="2" height="2" fill="#ffd60a"/>
+      <rect x="50" y="14" width="2" height="2" fill="#fff"/>
+      <rect x="68" y="10" width="2" height="2" fill="#ff2e93"/>
+      <rect x="2" y="44" width="2" height="2" fill="#fff"/>
+      <rect x="76" y="28" width="2" height="2" fill="#ffd60a"/>
+    </symbol>
+
+    <!-- Sad pixel character for wrong answers - drooping plant in a pot
+         (silly but not mean-spirited) -->
+    <symbol id="art-sad-plant" viewBox="0 0 80 80">
+      <rect width="80" height="80" fill="#ff3860"/>
+      <!-- Pot -->
+      <rect x="22" y="50" width="36" height="22" fill="#8b5a2b" stroke="#1a0033" stroke-width="1.5"/>
+      <rect x="20" y="48" width="40" height="4" fill="#a06c3e" stroke="#1a0033" stroke-width="1.5"/>
+      <!-- Dirt -->
+      <rect x="24" y="52" width="32" height="4" fill="#3a2818"/>
+      <!-- Drooping stem -->
+      <rect x="38" y="40" width="4" height="10" fill="#2d8a3e"/>
+      <rect x="34" y="36" width="4" height="6" fill="#2d8a3e"/>
+      <rect x="42" y="36" width="4" height="6" fill="#2d8a3e"/>
+      <!-- Droopy leaves -->
+      <rect x="26" y="34" width="10" height="4" fill="#1a6e2e"/>
+      <rect x="44" y="34" width="10" height="4" fill="#1a6e2e"/>
+      <rect x="24" y="38" width="8" height="2" fill="#1a6e2e"/>
+      <rect x="48" y="38" width="8" height="2" fill="#1a6e2e"/>
+      <!-- Sad face on pot -->
+      <rect x="30" y="60" width="3" height="3" fill="#1a0033"/>
+      <rect x="47" y="60" width="3" height="3" fill="#1a0033"/>
+      <rect x="34" y="66" width="12" height="2" fill="#1a0033"/>
+      <rect x="32" y="68" width="2" height="2" fill="#1a0033"/>
+      <rect x="46" y="68" width="2" height="2" fill="#1a0033"/>
+      <!-- Tear drops -->
+      <rect x="28" y="64" width="2" height="3" fill="#00f0ff"/>
+      <rect x="50" y="64" width="2" height="3" fill="#00f0ff"/>
+      <!-- Wilted leaf falling -->
+      <rect x="12" y="50" width="4" height="2" fill="#8b6a1f"/>
+      <rect x="64" y="56" width="4" height="2" fill="#8b6a1f"/>
+    </symbol>
+
+    <!-- Trophy for end-of-quiz (high score) -->
+    <symbol id="art-trophy" viewBox="0 0 80 80">
+      <rect width="80" height="80" fill="#1a0033"/>
+      <!-- Confetti dots in bg -->
+      <rect x="8" y="10" width="3" height="3" fill="#ff2e93"/>
+      <rect x="68" y="14" width="3" height="3" fill="#00f0ff"/>
+      <rect x="14" y="62" width="3" height="3" fill="#39ff14"/>
+      <rect x="62" y="58" width="3" height="3" fill="#ffd60a"/>
+      <rect x="4" y="40" width="3" height="3" fill="#fff"/>
+      <rect x="74" y="44" width="3" height="3" fill="#fff"/>
+      <!-- Trophy cup body -->
+      <rect x="26" y="20" width="28" height="22" fill="#ffd60a" stroke="#1a0033" stroke-width="2"/>
+      <!-- Trophy handles -->
+      <rect x="22" y="24" width="4" height="10" fill="#ffd60a" stroke="#1a0033" stroke-width="2"/>
+      <rect x="54" y="24" width="4" height="10" fill="#ffd60a" stroke="#1a0033" stroke-width="2"/>
+      <!-- Shine highlight -->
+      <rect x="30" y="24" width="3" height="14" fill="#fff5b0"/>
+      <!-- Number 1 on trophy (clear and readable) -->
+      <rect x="38" y="26" width="4" height="2" fill="#ff2e93"/>
+      <rect x="38" y="28" width="2" height="2" fill="#ff2e93"/>
+      <rect x="38" y="28" width="4" height="10" fill="#ff2e93"/>
+      <rect x="36" y="36" width="8" height="2" fill="#ff2e93"/>
+      <!-- Stem -->
+      <rect x="36" y="42" width="8" height="6" fill="#c9a000" stroke="#1a0033" stroke-width="2"/>
+      <!-- Base -->
+      <rect x="24" y="48" width="32" height="6" fill="#ffd60a" stroke="#1a0033" stroke-width="2"/>
+      <rect x="20" y="54" width="40" height="8" fill="#c9a000" stroke="#1a0033" stroke-width="2"/>
+    </symbol>
+
+    <!-- Floppy disk for the start screen -->
+    <symbol id="art-floppy" viewBox="0 0 80 80">
+      <rect width="80" height="80" fill="#2d0a4e"/>
+      <!-- Sparkles -->
+      <rect x="6" y="8" width="3" height="3" fill="#ffd60a"/>
+      <rect x="70" y="12" width="3" height="3" fill="#00f0ff"/>
+      <rect x="68" y="68" width="3" height="3" fill="#ff2e93"/>
+      <rect x="8" y="64" width="3" height="3" fill="#39ff14"/>
+      <!-- Floppy disk body -->
+      <rect x="14" y="14" width="52" height="52" fill="#1a0033" stroke="#fff" stroke-width="2"/>
+      <rect x="16" y="16" width="48" height="48" fill="#3535e0"/>
+      <!-- Metal slider top -->
+      <rect x="22" y="16" width="36" height="14" fill="#c0c0c0" stroke="#1a0033" stroke-width="1.5"/>
+      <rect x="32" y="18" width="14" height="10" fill="#1a0033"/>
+      <!-- Label -->
+      <rect x="22" y="34" width="36" height="22" fill="#fff8e7" stroke="#1a0033" stroke-width="1.5"/>
+      <!-- Label text lines -->
+      <rect x="26" y="38" width="20" height="2" fill="#ff2e93"/>
+      <rect x="26" y="42" width="28" height="2" fill="#1a0033"/>
+      <rect x="26" y="46" width="24" height="2" fill="#1a0033"/>
+      <rect x="26" y="50" width="20" height="2" fill="#1a0033"/>
+    </symbol>
+
+    <symbol id="badge-first-correct" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <!-- Big yellow star -->
+        <rect x="14" y="4" width="4" height="4" fill="#ffd60a"/>
+        <rect x="12" y="8" width="8" height="4" fill="#ffd60a"/>
+        <rect x="4" y="12" width="24" height="4" fill="#ffd60a"/>
+        <rect x="6" y="16" width="20" height="4" fill="#ffd60a"/>
+        <rect x="8" y="20" width="6" height="4" fill="#ffd60a"/>
+        <rect x="18" y="20" width="6" height="4" fill="#ffd60a"/>
+        <rect x="6" y="24" width="6" height="4" fill="#ffd60a"/>
+        <rect x="20" y="24" width="6" height="4" fill="#ffd60a"/>
+        <!-- Sparkle highlight -->
+        <rect x="12" y="12" width="2" height="6" fill="#fff5b0"/>
+        </symbol>
+    <symbol id="badge-hot-streak" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <!-- Flame tip -->
+        <rect x="14" y="4" width="4" height="2" fill="#ffd60a"/>
+        <rect x="12" y="6" width="8" height="2" fill="#ff8c00"/>
+        <!-- Main body -->
+        <rect x="10" y="8" width="12" height="4" fill="#ff3860"/>
+        <rect x="8" y="12" width="16" height="8" fill="#ff3860"/>
+        <rect x="10" y="20" width="12" height="6" fill="#ff8c00"/>
+        <rect x="14" y="26" width="4" height="2" fill="#ffd60a"/>
+        <!-- Inner glow -->
+        <rect x="14" y="12" width="4" height="10" fill="#ffd60a"/>
+        <rect x="14" y="14" width="4" height="4" fill="#fff5b0"/>
+        </symbol>
+    <symbol id="badge-on-fire" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <!-- Flame -->
+        <rect x="14" y="2" width="4" height="2" fill="#ffd60a"/>
+        <rect x="12" y="4" width="8" height="2" fill="#ff8c00"/>
+        <rect x="10" y="6" width="12" height="4" fill="#ff3860"/>
+        <rect x="8" y="10" width="16" height="10" fill="#ff3860"/>
+        <rect x="6" y="14" width="20" height="8" fill="#ff3860"/>
+        <rect x="8" y="22" width="16" height="4" fill="#ff8c00"/>
+        <rect x="12" y="26" width="8" height="2" fill="#ffd60a"/>
+        <!-- "10" inside flame in white pixels -->
+        <rect x="11" y="12" width="2" height="8" fill="#fff"/>
+        <rect x="15" y="12" width="2" height="2" fill="#fff"/>
+        <rect x="19" y="12" width="2" height="2" fill="#fff"/>
+        <rect x="15" y="14" width="6" height="2" fill="#fff"/>
+        <rect x="15" y="18" width="6" height="2" fill="#fff"/>
+        <rect x="15" y="14" width="2" height="6" fill="#fff"/>
+        <rect x="19" y="14" width="2" height="6" fill="#fff"/>
+        </symbol>
+    <symbol id="badge-unstoppable" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <!-- Lightning bolt - classic zigzag shape -->
+        <rect x="16" y="4" width="6" height="2" fill="#ffd60a"/>
+        <rect x="14" y="6" width="8" height="2" fill="#ffd60a"/>
+        <rect x="12" y="8" width="10" height="2" fill="#ffd60a"/>
+        <rect x="10" y="10" width="12" height="2" fill="#ffd60a"/>
+        <rect x="8" y="12" width="14" height="2" fill="#ffd60a"/>
+        <!-- Connector -->
+        <rect x="14" y="14" width="10" height="2" fill="#ffd60a"/>
+        <!-- Bottom half -->
+        <rect x="12" y="16" width="10" height="2" fill="#ffd60a"/>
+        <rect x="10" y="18" width="10" height="2" fill="#ffd60a"/>
+        <rect x="10" y="20" width="8" height="2" fill="#ffd60a"/>
+        <rect x="10" y="22" width="6" height="2" fill="#ffd60a"/>
+        <rect x="10" y="24" width="4" height="2" fill="#ffd60a"/>
+        <rect x="10" y="26" width="2" height="2" fill="#ffd60a"/>
+        <!-- Highlight -->
+        <rect x="16" y="6" width="2" height="8" fill="#fff5b0"/>
+        </symbol>
+    <symbol id="badge-flawless" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <!-- Diamond top -->
+        <rect x="10" y="8" width="12" height="2" fill="#00f0ff"/>
+        <rect x="8" y="10" width="16" height="2" fill="#00f0ff"/>
+        <!-- Wide middle -->
+        <rect x="6" y="12" width="20" height="4" fill="#39ff14"/>
+        <!-- Narrowing -->
+        <rect x="8" y="16" width="16" height="2" fill="#00f0ff"/>
+        <rect x="10" y="18" width="12" height="2" fill="#00f0ff"/>
+        <rect x="12" y="20" width="8" height="2" fill="#00f0ff"/>
+        <rect x="14" y="22" width="4" height="2" fill="#39ff14"/>
+        <!-- Diamond facet lines -->
+        <rect x="14" y="10" width="2" height="2" fill="#fff"/>
+        <rect x="10" y="12" width="2" height="2" fill="#fff"/>
+        <!-- Sparkles outside -->
+        <rect x="4" y="6" width="2" height="2" fill="#fff"/>
+        <rect x="26" y="6" width="2" height="2" fill="#fff"/>
+        <rect x="4" y="24" width="2" height="2" fill="#fff"/>
+        <rect x="26" y="24" width="2" height="2" fill="#fff"/>
+        </symbol>
+    <symbol id="badge-speed-demon" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <!-- Watch button top -->
+        <rect x="14" y="4" width="4" height="2" fill="#c0c0c0"/>
+        <!-- Watch top stem -->
+        <rect x="13" y="6" width="6" height="2" fill="#c0c0c0"/>
+        <!-- Watch body (round-ish) -->
+        <rect x="10" y="8" width="12" height="2" fill="#c0c0c0"/>
+        <rect x="8" y="10" width="16" height="2" fill="#c0c0c0"/>
+        <rect x="8" y="12" width="2" height="10" fill="#c0c0c0"/>
+        <rect x="22" y="12" width="2" height="10" fill="#c0c0c0"/>
+        <rect x="8" y="22" width="16" height="2" fill="#c0c0c0"/>
+        <rect x="10" y="24" width="12" height="2" fill="#c0c0c0"/>
+        <!-- Watch face -->
+        <rect x="10" y="12" width="12" height="10" fill="#fff"/>
+        <!-- Lightning bolt -->
+        <rect x="16" y="13" width="2" height="3" fill="#ffd60a"/>
+        <rect x="14" y="15" width="4" height="2" fill="#ffd60a"/>
+        <rect x="13" y="17" width="6" height="1" fill="#ffd60a"/>
+        <rect x="14" y="18" width="4" height="2" fill="#ffd60a"/>
+        <rect x="15" y="20" width="2" height="2" fill="#ffd60a"/>
+        </symbol>
+    <symbol id="badge-comeback" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <!-- Arrow head -->
+        <rect x="14" y="4" width="4" height="2" fill="#39ff14"/>
+        <rect x="12" y="6" width="8" height="2" fill="#39ff14"/>
+        <rect x="10" y="8" width="12" height="2" fill="#39ff14"/>
+        <rect x="8" y="10" width="16" height="2" fill="#39ff14"/>
+        <!-- Arrow shaft -->
+        <rect x="13" y="12" width="6" height="10" fill="#39ff14"/>
+        <!-- Bright highlight -->
+        <rect x="14" y="6" width="2" height="16" fill="#a5ff8c"/>
+        <!-- Bouncing back from ashes -->
+        <rect x="6" y="24" width="4" height="2" fill="#ff8c00"/>
+        <rect x="14" y="24" width="4" height="2" fill="#ff8c00"/>
+        <rect x="22" y="24" width="4" height="2" fill="#ff8c00"/>
+        <rect x="8" y="26" width="2" height="2" fill="#ff3860"/>
+        <rect x="16" y="26" width="2" height="2" fill="#ff3860"/>
+        <rect x="22" y="26" width="2" height="2" fill="#ff3860"/>
+        </symbol>
+    <symbol id="badge-halfway" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <!-- "1" -->
+        <rect x="8" y="6" width="2" height="10" fill="#ffd60a"/>
+        <rect x="6" y="6" width="2" height="2" fill="#ffd60a"/>
+        <rect x="6" y="14" width="6" height="2" fill="#ffd60a"/>
+        <!-- "/" -->
+        <rect x="14" y="12" width="2" height="2" fill="#fff"/>
+        <rect x="15" y="10" width="2" height="2" fill="#fff"/>
+        <rect x="16" y="8" width="2" height="2" fill="#fff"/>
+        <rect x="17" y="6" width="2" height="2" fill="#fff"/>
+        <!-- "2" -->
+        <rect x="20" y="6" width="6" height="2" fill="#ffd60a"/>
+        <rect x="24" y="8" width="2" height="4" fill="#ffd60a"/>
+        <rect x="22" y="10" width="2" height="2" fill="#ffd60a"/>
+        <rect x="20" y="12" width="2" height="2" fill="#ffd60a"/>
+        <rect x="20" y="14" width="6" height="2" fill="#ffd60a"/>
+        <!-- Half-filled bar below -->
+        <rect x="4" y="20" width="24" height="6" fill="#1a0033" stroke="#fff" stroke-width="1"/>
+        <rect x="5" y="21" width="11" height="4" fill="#ffd60a"/>
+        </symbol>
+    <symbol id="badge-literary-scholar" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <!-- Open book pages -->
+        <rect x="4" y="8" width="11" height="18" fill="#fff8e7" stroke="#1a0033" stroke-width="1"/>
+        <rect x="17" y="8" width="11" height="18" fill="#fff8e7" stroke="#1a0033" stroke-width="1"/>
+        <!-- Spine -->
+        <rect x="15" y="8" width="2" height="18" fill="#ff2e93"/>
+        <!-- Text lines -->
+        <rect x="6" y="12" width="7" height="1" fill="#1a0033"/>
+        <rect x="6" y="14" width="7" height="1" fill="#1a0033"/>
+        <rect x="6" y="16" width="5" height="1" fill="#1a0033"/>
+        <rect x="6" y="20" width="7" height="1" fill="#1a0033"/>
+        <rect x="6" y="22" width="6" height="1" fill="#1a0033"/>
+        <rect x="19" y="12" width="7" height="1" fill="#1a0033"/>
+        <rect x="19" y="14" width="7" height="1" fill="#1a0033"/>
+        <rect x="19" y="16" width="5" height="1" fill="#1a0033"/>
+        <rect x="19" y="20" width="7" height="1" fill="#1a0033"/>
+        <rect x="19" y="22" width="6" height="1" fill="#1a0033"/>
+        <!-- Star on top -->
+        <rect x="14" y="2" width="4" height="2" fill="#ffd60a"/>
+        <rect x="12" y="4" width="8" height="2" fill="#ffd60a"/>
+        <rect x="14" y="6" width="4" height="2" fill="#ffd60a"/>
+        </symbol>
+    <symbol id="badge-bookworm" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <rect x="6" y="6" width="20" height="6" fill="#ff2e93" stroke="#1a0033" stroke-width="1"/>
+        <rect x="8" y="8" width="14" height="1" fill="#fff"/>
+        <rect x="8" y="10" width="10" height="1" fill="#fff"/>
+        <rect x="4" y="13" width="22" height="6" fill="#00f0ff" stroke="#1a0033" stroke-width="1"/>
+        <rect x="6" y="15" width="16" height="1" fill="#1a0033"/>
+        <rect x="6" y="17" width="12" height="1" fill="#1a0033"/>
+        <rect x="6" y="20" width="20" height="6" fill="#ffd60a" stroke="#1a0033" stroke-width="1"/>
+        <rect x="8" y="22" width="14" height="1" fill="#1a0033"/>
+        <rect x="8" y="24" width="10" height="1" fill="#1a0033"/>
+        </symbol>
+    <symbol id="badge-master" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <rect x="6" y="8" width="4" height="4" fill="#ffd60a"/>
+        <rect x="14" y="4" width="4" height="8" fill="#ffd60a"/>
+        <rect x="22" y="8" width="4" height="4" fill="#ffd60a"/>
+        <rect x="4" y="12" width="24" height="10" fill="#ffd60a" stroke="#1a0033" stroke-width="1"/>
+        <rect x="8" y="14" width="3" height="3" fill="#ff2e93"/>
+        <rect x="14" y="14" width="4" height="4" fill="#00f0ff"/>
+        <rect x="21" y="14" width="3" height="3" fill="#39ff14"/>
+        <rect x="4" y="22" width="24" height="4" fill="#c9a000"/>
+        </symbol>
+    <symbol id="badge-perfect" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <!-- Big star shape -->
+        <rect x="14" y="2" width="4" height="2" fill="#ffd60a"/>
+        <rect x="12" y="4" width="8" height="2" fill="#ffd60a"/>
+        <rect x="10" y="6" width="12" height="4" fill="#ffd60a"/>
+        <rect x="2" y="10" width="28" height="4" fill="#ffd60a"/>
+        <rect x="4" y="14" width="24" height="4" fill="#ffd60a"/>
+        <rect x="6" y="18" width="20" height="2" fill="#ffd60a"/>
+        <rect x="10" y="20" width="12" height="2" fill="#ffd60a"/>
+        <rect x="8" y="22" width="6" height="4" fill="#ffd60a"/>
+        <rect x="18" y="22" width="6" height="4" fill="#ffd60a"/>
+        <rect x="6" y="26" width="4" height="2" fill="#ffd60a"/>
+        <rect x="22" y="26" width="4" height="2" fill="#ffd60a"/>
+        <!-- Bright "100" in middle - reading clearly -->
+        <!-- "1" -->
+        <rect x="8" y="11" width="2" height="6" fill="#ff2e93"/>
+        <rect x="7" y="11" width="1" height="1" fill="#ff2e93"/>
+        <rect x="7" y="16" width="4" height="1" fill="#ff2e93"/>
+        <!-- "0" -->
+        <rect x="13" y="11" width="4" height="1" fill="#ff2e93"/>
+        <rect x="13" y="16" width="4" height="1" fill="#ff2e93"/>
+        <rect x="13" y="11" width="1" height="6" fill="#ff2e93"/>
+        <rect x="16" y="11" width="1" height="6" fill="#ff2e93"/>
+        <!-- "0" -->
+        <rect x="19" y="11" width="4" height="1" fill="#ff2e93"/>
+        <rect x="19" y="16" width="4" height="1" fill="#ff2e93"/>
+        <rect x="19" y="11" width="1" height="6" fill="#ff2e93"/>
+        <rect x="22" y="11" width="1" height="6" fill="#ff2e93"/>
+        </symbol>
+    <symbol id="badge-survivor" viewBox="0 0 32 32" shape-rendering="crispEdges">
+        <rect width="32" height="32" fill="#1a0033"/>
+        <rect x="4" y="4" width="2" height="26" fill="#c0c0c0"/>
+        <rect x="6" y="6" width="22" height="14" fill="#fff" stroke="#1a0033" stroke-width="1"/>
+        <rect x="6" y="6" width="4" height="4" fill="#1a0033"/>
+        <rect x="14" y="6" width="4" height="4" fill="#1a0033"/>
+        <rect x="22" y="6" width="4" height="4" fill="#1a0033"/>
+        <rect x="10" y="10" width="4" height="4" fill="#1a0033"/>
+        <rect x="18" y="10" width="4" height="4" fill="#1a0033"/>
+        <rect x="6" y="14" width="4" height="4" fill="#1a0033"/>
+        <rect x="14" y="14" width="4" height="4" fill="#1a0033"/>
+        <rect x="22" y="14" width="4" height="4" fill="#1a0033"/>
+        </symbol>
+  </defs>
+</svg>
+
+<script>
+// =============================================
+// QUESTION DATA - Base64-encoded to prevent
+// students from seeing answers in page source.
+// =============================================
+const ENCODED_BANK = [{"w":"Unadulterated","d":"cHVyZTsgbm90IG1peGVkIHdpdGggYW55dGhpbmcgZWxzZTsgY29tcGxldGUgYW5kIHRvdGFs","q":[{"s":"VGhlIGNoaWxkJ3MgbGF1Z2h0ZXIgd2FzIGEgbW9tZW50IG9mIF9fXyBqb3ksIHVudG91Y2hlZCBieSBhbnkgd29ycnkgb3IgY2FyZS4=","o":["aW1taW5lbnQ=","dW5hZHVsdGVyYXRlZA==","Z2xhcmluZw==","dHJlYWNoZXJvdXM="],"c":"dW5hZHVsdGVyYXRlZA=="},{"s":"U2hlIG9mZmVyZWQgaGVyIF9fXyBvcGluaW9uLCBmcmVlIGZyb20gZmxhdHRlcnkgb3IgcG9saXRpY2FsIGNvbmNlcm4u","o":["dW5hZHVsdGVyYXRlZA==","dHJlYWNoZXJvdXM=","aW1taW5lbnQ=","c2FuY3RpbW9uaW91cw=="],"c":"dW5hZHVsdGVyYXRlZA=="}]},{"w":"Ample","d":"bW9yZSB0aGFuIGVub3VnaDsgcGxlbnRpZnVsIGluIHF1YW50aXR5IG9yIHNpemU=","q":[{"s":"VGhlcmUgd2FzIF9fXyB0aW1lIHRvIGZpbmlzaCB0aGUgcHJvamVjdCBiZWZvcmUgdGhlIGRlYWRsaW5lLg==","o":["YW1wbGU=","c2FuY3RpbW9uaW91cw==","dW5zY3J1cHVsb3Vz","cHJvdmluY2lhbA=="],"c":"YW1wbGU="},{"s":"VGhlIG5ldyBhcGFydG1lbnQgaGFkIF9fXyBzdG9yYWdlIHNwYWNlIGZvciBhbGwgb2YgdGhlaXIgYmVsb25naW5ncy4=","o":["cHJvdmluY2lhbA==","YWxvb2Y=","Y29tcGxhY2VudA==","YW1wbGU="],"c":"YW1wbGU="}]},{"w":"Undulate","d":"dG8gbW92ZSBpbiBhIHNtb290aCwgd2F2ZS1saWtlIG1vdGlvbg==","q":[{"s":"VGhlIGZpZWxkcyBvZiB3aGVhdCBiZWdhbiB0byBfX18gZ2VudGx5IGluIHRoZSBzdW1tZXIgYnJlZXplLg==","o":["cmVuZGVy","cmVwdWRpYXRlZA==","YWRtb25pc2g=","dW5kdWxhdGU="],"c":"dW5kdWxhdGU="},{"s":"V2Ugd2F0Y2hlZCB0aGUgc25ha2UncyBib2R5IF9fXyBzbW9vdGhseSBhY3Jvc3MgdGhlIGRlc2VydCBzYW5kLg==","o":["YWJzb2x2ZQ==","dW5kdWxhdGU=","Y29uY3Vy","Y2hhc3Rpc2U="],"c":"dW5kdWxhdGU="}]},{"w":"Epiphany","d":"YSBzdWRkZW4sIHBvd2VyZnVsIHJlYWxpemF0aW9uIG9yIGluc2lnaHQ=","q":[{"s":"V2hpbGUgd2Fsa2luZyBob21lLCBzaGUgaGFkIGEgc3VkZGVuIF9fXyBhYm91dCB3aHkgaGVyIHBsYW4gaGFkIGJlZW4gZmFpbGluZy4=","o":["ZXBpcGhhbnk=","Y291cA==","ZW5taXR5","YW5hcGhvcmE="],"c":"ZXBpcGhhbnk="},{"s":"VGhlIHNjaWVudGlzdCdzIF9fXyBjYW1lIGluIHRoZSBtaWRkbGUgb2YgdGhlIG5pZ2h0LCBmaW5hbGx5IHNvbHZpbmcgdGhlIGVxdWF0aW9uLg==","o":["YW5hcGhvcmE=","ZWRpY3Q=","aW1wdW5pdHk=","ZXBpcGhhbnk="],"c":"ZXBpcGhhbnk="}]},{"w":"Absolve","d":"dG8gZm9ybWFsbHkgY2xlYXIgc29tZW9uZSBvZiBibGFtZSBvciBndWlsdA==","q":[{"s":"VGhlIGp1ZGdlIGNob3NlIHRvIF9fXyB0aGUgZGVmZW5kYW50IG9mIGFueSB3cm9uZ2RvaW5nIGFmdGVyIG5ldyBldmlkZW5jZSBlbWVyZ2VkLg==","o":["Y2hhc3Rpc2U=","YWJzb2x2ZQ==","Y2Vuc3VyZQ==","Y29uY3Vy"],"c":"YWJzb2x2ZQ=="},{"s":"Q29uZmVzc2luZyB0aGUgdHJ1dGggc2VlbWVkIHRvIF9fXyBoaW0gb2YgdGhlIGd1aWx0IGhlIGhhZCBjYXJyaWVkIGZvciB5ZWFycy4=","o":["YWRtb25pc2g=","ZW1lcmdl","cmVuZGVy","YWJzb2x2ZQ=="],"c":"YWJzb2x2ZQ=="}]},{"w":"Impunity","d":"ZnJlZWRvbSBmcm9tIHB1bmlzaG1lbnQgb3IgY29uc2VxdWVuY2VzIGZvciBvbmUncyBhY3Rpb25z","q":[{"s":"VGhlIGNvcnJ1cHQgb2ZmaWNpYWwgYWN0ZWQgd2l0aCBfX18sIGtub3dpbmcgbm8gb25lIHdvdWxkIGRhcmUgaG9sZCBoaW0gYWNjb3VudGFibGUu","o":["Y2Vuc3VyZQ==","cmVzb2x1dGlvbg==","ZXVwaGVtaXNt","aW1wdW5pdHk="],"c":"aW1wdW5pdHk="},{"s":"QnVsbGllcyBvZnRlbiBvcGVyYXRlIHdpdGggX19fIHdoZW4gYWR1bHRzIGZhaWwgdG8gc3RlcCBpbi4=","o":["aW1wdW5pdHk=","bWF4aW0=","ZmF0ZQ==","cGFyYWxsZWxpc20="],"c":"aW1wdW5pdHk="}]},{"w":"Reproachful","d":"ZXhwcmVzc2luZyBkaXNhcHBvaW50bWVudCBvciBkaXNhcHByb3ZhbA==","q":[{"s":"U2hlIGdhdmUgaGltIGEgX19fIGxvb2sgYWZ0ZXIgaGUgaW50ZXJydXB0ZWQgaGVyIGZvciB0aGUgdGhpcmQgdGltZS4=","o":["bW9yb3Nl","ZmxlZXRpbmc=","Zm9yZWJvZGluZw==","cmVwcm9hY2hmdWw="],"c":"cmVwcm9hY2hmdWw="},{"s":"VGhlIGNvYWNoJ3MgX19fIHRvbmUgbWFkZSBpdCBjbGVhciBoZSB3YXMgZGlzYXBwb2ludGVkIGluIHRoZSB0ZWFtJ3MgZWZmb3J0Lg==","o":["cmVwcm9hY2hmdWw=","c2FuY3RpbW9uaW91cw==","bW9yb3Nl","cHJvdmluY2lhbA=="],"c":"cmVwcm9hY2hmdWw="}]},{"w":"Irrevocably","d":"aW4gYSB3YXkgdGhhdCBjYW5ub3QgYmUgdW5kb25lIG9yIHJldmVyc2Vk","q":[{"s":"T25jZSB0aGUgbWVzc2FnZSB3YXMgc2VudCwgdGhlaXIgZnJpZW5kc2hpcCB3YXMgX19fIGNoYW5nZWQu","o":["ZW5taXR5","Y3Vyc29yeQ==","aXJyZXZvY2FibHk=","Y291cA=="],"c":"aXJyZXZvY2FibHk="},{"s":"VGhlIGRlY2lzaW9uIF9fXyBhbHRlcmVkIHRoZSBjb3Vyc2Ugb2YgaGlzIGNhcmVlci4=","o":["cmV2ZXJlbmNl","Y2Vuc3VyZQ==","aXJyZXZvY2FibHk=","YWxsdXNpb24="],"c":"aXJyZXZvY2FibHk="}]},{"w":"Foreboding","d":"YSBmZWVsaW5nIHRoYXQgc29tZXRoaW5nIGJhZCBpcyBhYm91dCB0byBoYXBwZW47IG9taW5vdXM=","q":[{"s":"QSBzZW5zZSBvZiBfX18gZmlsbGVkIHRoZSByb29tIGFzIHRoZSBzdG9ybSBjbG91ZHMgZ2F0aGVyZWQgb3V0c2lkZS4=","o":["aW50cmljYWN5","YWxsdXNpb24=","cmV2ZXJlbmNl","Zm9yZWJvZGluZw=="],"c":"Zm9yZWJvZGluZw=="},{"s":"VGhlIGRhcmssIGVtcHR5IGhhbGx3YXkgZ2F2ZSBoZXIgYSBfX18gZmVlbGluZyBzaGUgY291bGRuJ3Qgc2hha2Uu","o":["ZXBpcGhhbnk=","YWxsdXNpb24=","Zm9yZWJvZGluZw==","YW5hcGhvcmE="],"c":"Zm9yZWJvZGluZw=="}]},{"w":"Catharsis","d":"dGhlIHJlbGVhc2Ugb2Ygc3Ryb25nIGVtb3Rpb25zLCBvZnRlbiBicmluZ2luZyByZWxpZWY=","q":[{"s":"V3JpdGluZyBpbiBoZXIgam91cm5hbCBlYWNoIG5pZ2h0IHByb3ZpZGVkIHRoZSBlbW90aW9uYWwgX19fIHNoZSBuZWVkZWQu","o":["cmV0cmlidXRpb24=","cmVzb2x1dGlvbg==","aW5kaWduYXRpb24=","Y2F0aGFyc2lz"],"c":"Y2F0aGFyc2lz"},{"s":"VGhlIGF1ZGllbmNlIGV4cGVyaWVuY2VkIGEgcG93ZXJmdWwgX19fIGFzIHRoZSB0cmFnZWR5IHJlYWNoZWQgaXRzIGNvbmNsdXNpb24u","o":["Y2F0aGFyc2lz","bWF4aW0=","Zm9yZWJvZGluZw==","ZXBpc3Ryb3BoZQ=="],"c":"Y2F0aGFyc2lz"}]},{"w":"Coup","d":"YSBzdWRkZW4sIGRlY2lzaXZlLCBhbmQgc3VjY2Vzc2Z1bCBhY3Rpb24gKG9mdGVuIHRoZSBzZWl6dXJlIG9mIHBvd2VyKQ==","q":[{"s":"VGhlIGdlbmVyYWwncyBibG9vZGxlc3MgX19fIHJlcGxhY2VkIHRoZSBnb3Zlcm5tZW50IG92ZXJuaWdodC4=","o":["cmV2ZXJlbmNl","ZWRpY3Q=","Y291cA==","aHVicmlz"],"c":"Y291cA=="},{"s":"TGFuZGluZyB0aGUgY2VsZWJyaXR5IGludGVydmlldyB3YXMgY29uc2lkZXJlZCBhIG1ham9yIGpvdXJuYWxpc3RpYyBfX18u","o":["aW5kaWduYXRpb24=","Y291cA==","Y2F0aGFyc2lz","YW5hcGhvcmE="],"c":"Y291cA=="}]},{"w":"Nuance","d":"YSBzdWJ0bGUgZGlmZmVyZW5jZSBvciBzaGFkZSBvZiBtZWFuaW5nLCBleHByZXNzaW9uLCBvciBmZWVsaW5n","q":[{"s":"QSBza2lsbGVkIHRyYW5zbGF0b3IgY2FwdHVyZXMgZXZlcnkgX19fIG9mIG1lYW5pbmcgaW4gdGhlIG9yaWdpbmFsIHRleHQu","o":["bnVhbmNl","ZXVwaGVtaXNt","aHVicmlz","b3h5bW9yb24="],"c":"bnVhbmNl"},{"s":"VGhlIHBhaW50aW5nJ3MgYmVhdXR5IGxpZXMgaW4gdGhlIHN1YnRsZSBfX18gb2YgY29sb3IgYW5kIHNoYWRvdy4=","o":["ZXBpc3Ryb3BoZQ==","Y2Vuc3VyZQ==","ZXhpbGU=","bnVhbmNl"],"c":"bnVhbmNl"}]},{"w":"Trepidation","d":"YSBmZWVsaW5nIG9mIGZlYXIgb3IgYW54aWV0eSBhYm91dCBzb21ldGhpbmcgdGhhdCBtYXkgaGFwcGVu","q":[{"s":"U2hlIGFwcHJvYWNoZWQgdGhlIHByaW5jaXBhbCdzIG9mZmljZSB3aXRoIGdyZWF0IF9fXywgdW5zdXJlIG9mIHdoYXQgYXdhaXRlZCBoZXIu","o":["bWF4aW0=","dHJlcGlkYXRpb24=","Y2Vuc3VyZQ==","ZWRpY3Q="],"c":"dHJlcGlkYXRpb24="},{"s":"SGUgc3RlcHBlZCBvbnRvIHRoZSBzdGFnZSB3aXRoIG9idmlvdXMgX19fLCBoaXMgaGFuZHMgc2hha2luZyBzbGlnaHRseS4=","o":["YW5hcGhvcmE=","dHJlcGlkYXRpb24=","YWZmbGljdGlvbg==","ZmF0ZQ=="],"c":"dHJlcGlkYXRpb24="}]},{"w":"Morose","d":"Z2xvb215LCBzdWxsZW4sIGFuZCBpbGwtdGVtcGVyZWQ=","q":[{"s":"RXZlciBzaW5jZSBsb3NpbmcgdGhlIGNoYW1waW9uc2hpcCwgaGUgaGFkIGJlZW4gX19fIGFuZCB3aXRoZHJhd24u","o":["bW9yb3Nl","YWN1dGU=","cHJvdmluY2lhbA==","c29yZGlk"],"c":"bW9yb3Nl"},{"s":"SGVyIF9fXyBleHByZXNzaW9uIHRvbGQgZXZlcnlvbmUgdGhlIG5ld3MgaGFkIG5vdCBiZWVuIGdvb2Qu","o":["bW9yb3Nl","dW5hZHVsdGVyYXRlZA==","c2FuY3RpbW9uaW91cw==","dHJlYWNoZXJvdXM="],"c":"bW9yb3Nl"}]},{"w":"Imminent","d":"YWJvdXQgdG8gaGFwcGVuOyBpbXBlbmRpbmc=","q":[{"s":"V2l0aCBkYXJrIGNsb3VkcyByb2xsaW5nIGluLCB0aGUgc3Rvcm0gc2VlbWVkIF9fXy4=","o":["bHVtaW5vdXM=","Y29tcGxhY2VudA==","aW1taW5lbnQ=","YWZmbHVlbnQ="],"c":"aW1taW5lbnQ="},{"s":"VGhlIENFTyB3YXJuZWQgZW1wbG95ZWVzIG9mIF9fXyBjaGFuZ2VzIHRvIHRoZSBjb21wYW55J3Mgc3RydWN0dXJlLg==","o":["aW1taW5lbnQ=","bW9yb3Nl","YW1wbGU=","dmlnaWxhbnQ="],"c":"aW1taW5lbnQ="}]},{"w":"Luminous","d":"Z2l2aW5nIG9mZiBsaWdodDsgYnJpZ2h0IGFuZCBnbG93aW5n","q":[{"s":"VGhlIGZ1bGwgbW9vbiBjYXN0IGEgX19fIGdsb3cgYWNyb3NzIHRoZSBsYWtlLg==","o":["bHVtaW5vdXM=","Y29tcGxhY2VudA==","YWN1dGU=","c29yZGlk"],"c":"bHVtaW5vdXM="},{"s":"SGVyIF9fXyBzbWlsZSBsaXQgdXAgdGhlIGVudGlyZSByb29tLg==","o":["c29yZGlk","YWZmbHVlbnQ=","bHVtaW5vdXM=","aW1taW5lbnQ="],"c":"bHVtaW5vdXM="}]},{"w":"Demeanor","d":"b3V0d2FyZCBiZWhhdmlvciBvciBtYW5uZXI7IHRoZSB3YXkgYSBwZXJzb24gY2FycmllcyB0aGVtc2VsdmVz","q":[{"s":"RGVzcGl0ZSB0aGUgY2hhb3MgYXJvdW5kIGhpbSwgaGlzIGNhbG0gX19fIG5ldmVyIHdhdmVyZWQu","o":["ZXBpc3Ryb3BoZQ==","ZGVtZWFub3I=","Y2F0aGFyc2lz","YW5hcGhvcmE="],"c":"ZGVtZWFub3I="},{"s":"VGhlIGludGVydmlld2VyJ3MgZnJpZW5kbHkgX19fIGhlbHBlZCB0aGUgY2FuZGlkYXRlIHJlbGF4Lg==","o":["ZGVtZWFub3I=","ZXhpbGU=","cmV0cmlidXRpb24=","YWxsdXNpb24="],"c":"ZGVtZWFub3I="}]},{"w":"Chastise","d":"dG8gc2NvbGQgb3IgY3JpdGljaXplIHNldmVyZWx5","q":[{"s":"VGhlIHRlYWNoZXIgaGFkIHRvIF9fXyB0aGUgc3R1ZGVudHMgZm9yIHRhbGtpbmcgZHVyaW5nIHRoZSBleGFtLg==","o":["cmVwdWRpYXRlZA==","ZXhwb3VuZA==","ZW1lcmdl","Y2hhc3Rpc2U="],"c":"Y2hhc3Rpc2U="},{"s":"TXkgZ3JhbmRtb3RoZXIgd291bGQgZ2VudGx5IF9fXyBtZSB3aGVuZXZlciBJIGZvcmdvdCBteSBtYW5uZXJzLg==","o":["cmVuZGVy","cmVwdWRpYXRlZA==","ZXhwb3VuZA==","Y2hhc3Rpc2U="],"c":"Y2hhc3Rpc2U="}]},{"w":"Affable","d":"ZnJpZW5kbHksIGdvb2QtbmF0dXJlZCwgYW5kIGVhc3kgdG8gdGFsayB0bw==","q":[{"s":"VGhlIG5ldyBuZWlnaGJvciB3YXMgc28gX19fIHRoYXQgZXZlcnlvbmUgb24gdGhlIGJsb2NrIGluc3RhbnRseSBsaWtlZCBoaW0u","o":["Zm9yZWJvZGluZw==","dmlnaWxhbnQ=","YWZmYWJsZQ==","b2JzdGluYXRl"],"c":"YWZmYWJsZQ=="},{"s":"SGVyIF9fXyBtYW5uZXIgbWFkZSBjdXN0b21lcnMgZmVlbCB3ZWxjb21lIHRoZSBtb21lbnQgdGhleSBlbnRlcmVkLg==","o":["c2FuY3RpbW9uaW91cw==","c29yZGlk","dHJlYWNoZXJvdXM=","YWZmYWJsZQ=="],"c":"YWZmYWJsZQ=="}]},{"w":"Cursory","d":"aGFzdHkgYW5kIHN1cGVyZmljaWFsOyBkb25lIHF1aWNrbHkgd2l0aG91dCBhdHRlbnRpb24gdG8gZGV0YWls","q":[{"s":"SGUgZ2F2ZSB0aGUgcmVwb3J0IG9ubHkgYSBfX18gZ2xhbmNlIGJlZm9yZSBzaWduaW5nIGl0Lg==","o":["YWN1dGU=","Y3Vyc29yeQ==","YWZmYWJsZQ==","YWxvb2Y="],"c":"Y3Vyc29yeQ=="},{"s":"QSBfX18gaW5zcGVjdGlvbiBvZiB0aGUgY2FyIG1pc3NlZCB0aGUgc2VyaW91cyBkYW1hZ2UgdW5kZXJuZWF0aC4=","o":["dW5zY3J1cHVsb3Vz","Y3Vyc29yeQ==","b2JzdGluYXRl","dW5hZHVsdGVyYXRlZA=="],"c":"Y3Vyc29yeQ=="}]},{"w":"Atone","d":"dG8gbWFrZSBhbWVuZHMgZm9yIGEgd3Jvbmcgb3IgbWlzdGFrZQ==","q":[{"s":"SGUgc3BlbnQgeWVhcnMgdHJ5aW5nIHRvIF9fXyBmb3IgdGhlIG1pc3Rha2VzIG9mIGhpcyB5b3V0aC4=","o":["dW5kdWxhdGU=","cmVuZGVy","Y2Vuc3VyZQ==","YXRvbmU="],"c":"YXRvbmU="},{"s":"U2hlIHZvbHVudGVlcmVkIGF0IHRoZSBzaGVsdGVyIHRvIF9fXyBmb3IgaGVyIHBhc3Qgc2VsZmlzaG5lc3Mu","o":["YXRvbmU=","cmVwdWRpYXRlZA==","Y29uY3Vy","cmVuZGVy"],"c":"YXRvbmU="}]},{"w":"Affluent","d":"d2VhbHRoeTsgaGF2aW5nIGFuIGFidW5kYW5jZSBvZiBtb25leQ==","q":[{"s":"VGhleSBtb3ZlZCB0byBhbiBfX18gbmVpZ2hib3Job29kIHdpdGggbWFuaWN1cmVkIGxhd25zIGFuZCBsdXh1cnkgY2Fycy4=","o":["Y3Vyc29yeQ==","dHJlYWNoZXJvdXM=","YWZmbHVlbnQ=","b2JzdGluYXRl"],"c":"YWZmbHVlbnQ="},{"s":"RGVzcGl0ZSBoZXIgX19fIHVwYnJpbmdpbmcsIHNoZSBjaG9zZSBhIG1vZGVzdCBsaWZlc3R5bGUu","o":["YWZmbHVlbnQ=","dmlnaWxhbnQ=","dHJlYWNoZXJvdXM=","c29yZGlk"],"c":"YWZmbHVlbnQ="}]},{"w":"Unscrupulous","d":"aGF2aW5nIG9yIHNob3dpbmcgbm8gbW9yYWwgcHJpbmNpcGxlczsgZGlzaG9uZXN0","q":[{"s":"VGhlIF9fXyBzYWxlc21hbiBsaWVkIGFib3V0IHRoZSB3YXJyYW50eSB0byBjbG9zZSB0aGUgZGVhbC4=","o":["Zm9yZWJvZGluZw==","dW5zY3J1cHVsb3Vz","YWN1dGU=","dmlnaWxhbnQ="],"c":"dW5zY3J1cHVsb3Vz"},{"s":"SW52ZXN0b3JzIGxvc3QgZXZlcnl0aGluZyB0byBhbiBfX18gYnJva2VyIHdobyBmYWxzaWZpZWQgdGhlIHJlY29yZHMu","o":["YW1wbGU=","b2JzdGluYXRl","dW5zY3J1cHVsb3Vz","Z2xhcmluZw=="],"c":"dW5zY3J1cHVsb3Vz"}]},{"w":"Render","d":"dG8gY2F1c2Ugc29tZXRoaW5nIG9yIHNvbWVvbmUgdG8gYmUgaW4gYSBwYXJ0aWN1bGFyIHN0YXRlIG9yIGNvbmRpdGlvbg==","q":[{"s":"VGhlIGluanVyeSB3b3VsZCBfX18gaGltIHVuYWJsZSB0byBwbGF5IGZvciB0aGUgcmVzdCBvZiB0aGUgc2Vhc29uLg==","o":["cmVuZGVy","YWJzb2x2ZQ==","YWRtb25pc2g=","cmVwdWRpYXRlZA=="],"c":"cmVuZGVy"},{"s":"VGhlIGJsaXp6YXJkIHdvdWxkIF9fXyB0aGUgcm9hZHMgY29tcGxldGVseSBpbXBhc3NhYmxlLg==","o":["YWRtb25pc2g=","cmVuZGVy","ZXhwb3VuZA==","Y29uY3Vy"],"c":"cmVuZGVy"}]},{"w":"Disdain","d":"dGhlIGZlZWxpbmcgdGhhdCBzb21lb25lIG9yIHNvbWV0aGluZyBpcyB1bndvcnRoeSBvZiBjb25zaWRlcmF0aW9uOyBjb250ZW1wdA==","q":[{"s":"U2hlIGxvb2tlZCBhdCB0aGUgY2hlYXAgaW1pdGF0aW9uIHdpdGggb2J2aW91cyBfX18u","o":["aW5kaWduYXRpb24=","ZGlzZGFpbg==","YW5hcGhvcmE=","bnVhbmNl"],"c":"ZGlzZGFpbg=="},{"s":"SGlzIF9fXyBmb3Igc21hbGwgdGFsayBtYWRlIGhpbSBzZWVtIHVuZnJpZW5kbHkgYXQgcGFydGllcy4=","o":["Zm9yZWJvZGluZw==","ZWRpY3Q=","ZGlzZGFpbg==","anV4dGFwb3NpdGlvbg=="],"c":"ZGlzZGFpbg=="}]},{"w":"Affliction","d":"c29tZXRoaW5nIHRoYXQgY2F1c2VzIHBhaW4gb3Igc3VmZmVyaW5nOyBhbiBpbGxuZXNzIG9yIGJ1cmRlbg==","q":[{"s":"VGhlIHJhcmUgX19fIGxlZnQgaGVyIGJlZHJpZGRlbiBmb3IgbW9zdCBvZiB0aGUgd2ludGVyLg==","o":["ZGlzZGFpbg==","ZXBpc3Ryb3BoZQ==","ZXhpbGU=","YWZmbGljdGlvbg=="],"c":"YWZmbGljdGlvbg=="},{"s":"TG9uZWxpbmVzcyB3YXMgYSBxdWlldCBfX18gdGhhdCBmb2xsb3dlZCBoaW0gaW50byBvbGQgYWdlLg==","o":["Y2F0aGFyc2lz","YWZmbGljdGlvbg==","ZWRpY3Q=","cmVzb2x1dGlvbg=="],"c":"YWZmbGljdGlvbg=="}]},{"w":"Obstinate","d":"c3R1YmJvcm5seSByZWZ1c2luZyB0byBjaGFuZ2Ugb25lJ3Mgb3BpbmlvbiBvciBjb3Vyc2Ugb2YgYWN0aW9u","q":[{"s":"VGhlIF9fXyBtdWxlIHJlZnVzZWQgdG8gbW92ZSBubyBtYXR0ZXIgaG93IGhhcmQgd2UgcHVsbGVkLg==","o":["aW1taW5lbnQ=","b2JzdGluYXRl","YWN1dGU=","YWZmYWJsZQ=="],"c":"b2JzdGluYXRl"},{"s":"SGVyIF9fXyByZWZ1c2FsIHRvIGNvbXByb21pc2UgZXZlbnR1YWxseSBjb3N0IGhlciB0aGUgZGVhbC4=","o":["dW5hZHVsdGVyYXRlZA==","cmVwcm9hY2hmdWw=","b2JzdGluYXRl","YWxvb2Y="],"c":"b2JzdGluYXRl"}]},{"w":"Glaring","d":"ZXh0cmVtZWx5IG9idmlvdXM7IGltcG9zc2libGUgdG8gaWdub3Jl","q":[{"s":"VGhlcmUgd2FzIGEgX19fIGVycm9yIG9uIHRoZSBmaXJzdCBwYWdlIG9mIHRoZSByZXBvcnQu","o":["dW5hZHVsdGVyYXRlZA==","dHJlYWNoZXJvdXM=","Z2xhcmluZw==","Y29tcGxhY2VudA=="],"c":"Z2xhcmluZw=="},{"s":"VGhlIF9fXyBvbWlzc2lvbiBpbiBoaXMgdGVzdGltb255IGNhdWdodCB0aGUgbGF3eWVyJ3MgYXR0ZW50aW9uIGltbWVkaWF0ZWx5Lg==","o":["Z2xhcmluZw==","Y3Vyc29yeQ==","bW9yb3Nl","YWZmbHVlbnQ="],"c":"Z2xhcmluZw=="}]},{"w":"Intricacy","d":"dGhlIHF1YWxpdHkgb2YgYmVpbmcgY29tcGxleCBhbmQgZGV0YWlsZWQ=","q":[{"s":"VGhlIF9fXyBvZiB0aGUgd2F0Y2gncyBpbm5lciB3b3JraW5ncyBpbXByZXNzZWQgZXZlbiBzZWFzb25lZCBlbmdpbmVlcnMu","o":["aW1wdW5pdHk=","c292ZXJlaWdudHk=","Y2F0aGFyc2lz","aW50cmljYWN5"],"c":"aW50cmljYWN5"},{"s":"U2hlIG1hcnZlbGVkIGF0IHRoZSBfX18gb2YgdGhlIGhhbmQtd292ZW4gdGFwZXN0cnku","o":["anV4dGFwb3NpdGlvbg==","aHVicmlz","aW50cmljYWN5","ZGlzZGFpbg=="],"c":"aW50cmljYWN5"}]},{"w":"Fleeting","d":"bGFzdGluZyBmb3IgYSB2ZXJ5IHNob3J0IHRpbWU7IHBhc3NpbmcgcXVpY2tseQ==","q":[{"s":"Q2hpbGRob29kIGlzIF9fXzsgb25lIGRheSB5b3UgYmxpbmsgYW5kIGl0J3MgZ29uZS4=","o":["ZmxlZXRpbmc=","Zm9yZWJvZGluZw==","aW1taW5lbnQ=","dml2YWNpb3Vz"],"c":"ZmxlZXRpbmc="},{"s":"U2hlIGNhdWdodCBhIF9fXyBnbGltcHNlIG9mIGhpbSB0aHJvdWdoIHRoZSBjcm93ZCBiZWZvcmUgaGUgZGlzYXBwZWFyZWQu","o":["dW5hZHVsdGVyYXRlZA==","Y29tcGxhY2VudA==","ZmxlZXRpbmc=","Z2xhcmluZw=="],"c":"ZmxlZXRpbmc="}]},{"w":"Enmity","d":"dGhlIHN0YXRlIG9mIGJlaW5nIGFjdGl2ZWx5IG9wcG9zZWQgb3IgaG9zdGlsZTsgZGVlcCBoYXRyZWQ=","q":[{"s":"VGhlIF9fXyBiZXR3ZWVuIHRoZSB0d28gZmFtaWxpZXMgd2VudCBiYWNrIGdlbmVyYXRpb25zLg==","o":["ZXBpc3Ryb3BoZQ==","ZXVwaGVtaXNt","c292ZXJlaWdudHk=","ZW5taXR5"],"c":"ZW5taXR5"},{"s":"VGhlcmUgd2FzIGNsZWFyIF9fXyBpbiBoaXMgZXllcyB3aGVuZXZlciBoaXMgcml2YWwgZW50ZXJlZCB0aGUgcm9vbS4=","o":["ZmF0ZQ==","ZW5taXR5","anV4dGFwb3NpdGlvbg==","cGFyYWxsZWxpc20="],"c":"ZW5taXR5"}]},{"w":"Vivacious","d":"bGl2ZWx5LCBhbmltYXRlZCwgYW5kIGZ1bGwgb2YgZW5lcmd5IChvZnRlbiB1c2VkIHRvIGRlc2NyaWJlIHBlb3BsZSk=","q":[{"s":"SGVyIF9fXyBwZXJzb25hbGl0eSBtYWRlIGhlciB0aGUgY2VudGVyIG9mIGV2ZXJ5IGdhdGhlcmluZy4=","o":["dml2YWNpb3Vz","dmlnaWxhbnQ=","Y3Vyc29yeQ==","aW1taW5lbnQ="],"c":"dml2YWNpb3Vz"},{"s":"VGhlIF9fXyBob3N0IGtlcHQgdGhlIGNvbnZlcnNhdGlvbiBmbG93aW5nIGFsbCBldmVuaW5nLg==","o":["dml2YWNpb3Vz","aW1taW5lbnQ=","c29yZGlk","cHJvdmluY2lhbA=="],"c":"dml2YWNpb3Vz"}]},{"w":"Expound","d":"dG8gZXhwbGFpbiBzb21ldGhpbmcgaW4gZGV0YWlsOyB0byBzZXQgZm9ydGggYXQgbGVuZ3Ro","q":[{"s":"VGhlIHByb2Zlc3NvciBiZWdhbiB0byBfX18gb24gdGhlIHRoZW9yeSBmb3Igb3ZlciBhbiBob3VyLg==","o":["Y29uY3Vy","ZXhwb3VuZA==","cmVwdWRpYXRlZA==","cmVuZGVy"],"c":"ZXhwb3VuZA=="},{"s":"SGUgYXNrZWQgaGVyIHRvIF9fXyBmdXJ0aGVyIG9uIGhlciBwcm9wb3NhbCBkdXJpbmcgdGhlIG1lZXRpbmcu","o":["Y2Vuc3VyZQ==","ZXhwb3VuZA==","Y2hhc3Rpc2U=","YWJzb2x2ZQ=="],"c":"ZXhwb3VuZA=="}]},{"w":"Resolution","d":"YSBmaXJtIGRlY2lzaW9uIG9yIGRldGVybWluYXRpb24gdG8gZG8gc29tZXRoaW5n","q":[{"s":"U2hlIG1hZGUgYSBOZXcgWWVhcidzIF9fXyB0byBleGVyY2lzZSB0aHJlZSB0aW1lcyBhIHdlZWsu","o":["cmVzb2x1dGlvbg==","cmV2ZXJlbmNl","Y291cA==","b3h5bW9yb24="],"c":"cmVzb2x1dGlvbg=="},{"s":"RGVzcGl0ZSB0aGUgc2V0YmFja3MsIGhpcyBfX18gdG8gZmluaXNoIHRoZSBtYXJhdGhvbiBuZXZlciB3YXZlcmVkLg==","o":["YWZmbGljdGlvbg==","ZmF0ZQ==","cmVzb2x1dGlvbg==","aW5kaWduYXRpb24="],"c":"cmVzb2x1dGlvbg=="}]},{"w":"Acute","d":"c2hhcnAsIHNldmVyZSwgb3IgaW50ZW5zZTsgdmVyeSBwZXJjZXB0aXZl","q":[{"s":"SGUgZmVsdCBhbiBfX18gcGFpbiBpbiBoaXMgc2lkZSBhZnRlciB0aGUgZmFsbC4=","o":["YWxvb2Y=","YWN1dGU=","bHVtaW5vdXM=","cHJvdmluY2lhbA=="],"c":"YWN1dGU="},{"s":"SGVyIF9fXyBzZW5zZSBvZiBzbWVsbCBoZWxwZWQgaGVyIGlkZW50aWZ5IHRoZSBzcGljZSBpbW1lZGlhdGVseS4=","o":["YWN1dGU=","YWxvb2Y=","Y3Vyc29yeQ==","dW5hZHVsdGVyYXRlZA=="],"c":"YWN1dGU="}]},{"w":"Maxim","d":"YSBzaG9ydCwgd2VsbC1rbm93biBzYXlpbmcgZXhwcmVzc2luZyBhIGdlbmVyYWwgdHJ1dGggb3IgcnVsZQ==","q":[{"s":"SGUgbGl2ZWQgYnkgdGhlIF9fXyB0aGF0IGhvbmVzdHkgaXMgYWx3YXlzIHRoZSBiZXN0IHBvbGljeS4=","o":["ZXBpc3Ryb3BoZQ==","cmVzb2x1dGlvbg==","Y2F0aGFyc2lz","bWF4aW0="],"c":"bWF4aW0="},{"s":"VGhlIG9sZCBfX18gImhhc3RlIG1ha2VzIHdhc3RlIiBwcm92ZWQgdHJ1ZSBvbmNlIGFnYWluLg==","o":["aW1wdW5pdHk=","bWF4aW0=","Zm9yZWJvZGluZw==","b3h5bW9yb24="],"c":"bWF4aW0="}]},{"w":"Emerge","d":"dG8gY29tZSBvdXQgaW50byB2aWV3OyB0byBiZWNvbWUgYXBwYXJlbnQgb3Iga25vd24=","q":[{"s":"QWZ0ZXIgaG91cnMgb2Ygc2VhcmNoaW5nLCBuZXcgY2x1ZXMgYmVnYW4gdG8gX19fIGZyb20gdGhlIGV2aWRlbmNlLg==","o":["dW5kdWxhdGU=","ZXhwb3VuZA==","ZW1lcmdl","cmVwdWRpYXRlZA=="],"c":"ZW1lcmdl"},{"s":"VGhlIGhpa2VycyB3ZXJlIHJlbGlldmVkIHRvIF9fXyBmcm9tIHRoZSBkZW5zZSBmb3Jlc3QganVzdCBiZWZvcmUgc3Vuc2V0Lg==","o":["YWRtb25pc2g=","ZW1lcmdl","Y29uY3Vy","dW5kdWxhdGU="],"c":"ZW1lcmdl"}]},{"w":"Aloof","d":"ZGVsaWJlcmF0ZWx5IGRpc3RhbnQgb3IgcmVzZXJ2ZWQ7IGVtb3Rpb25hbGx5IHVuaW52b2x2ZWQ=","q":[{"s":"VGhvdWdoIGludml0ZWQgdG8gZXZlcnkgZ2F0aGVyaW5nLCBzaGUgcmVtYWluZWQgX19fLCBwcmVmZXJyaW5nIHRvIG9ic2VydmUgcmF0aGVyIHRoYW4gbWluZ2xlLg==","o":["YWxvb2Y=","dW5zY3J1cHVsb3Vz","b2JzdGluYXRl","Zm9yZWJvZGluZw=="],"c":"YWxvb2Y="},{"s":"SGUga2VwdCBfX18gZnJvbSBvZmZpY2UgZ29zc2lwIGFuZCBwb2xpdGljcywgbmV2ZXIgd2VpZ2hpbmcgaW4gb24gZWl0aGVyLg==","o":["b2JzdGluYXRl","YWxvb2Y=","YWN1dGU=","bW9yb3Nl"],"c":"YWxvb2Y="}]},{"w":"Sordid","d":"bW9yYWxseSBkZWdyYWRpbmcsIGRpcnR5LCBvciBpbnZvbHZpbmcgaW1tb3JhbCBhY3Rz","q":[{"s":"VGhlIHRhYmxvaWQgcHVibGlzaGVkIGV2ZXJ5IF9fXyBkZXRhaWwgb2YgdGhlIHNjYW5kYWwu","o":["c29yZGlk","YWxvb2Y=","cHJvdmluY2lhbA==","YWN1dGU="],"c":"c29yZGlk"},{"s":"QmVoaW5kIHRoZSBwb2xpc2hlZCBpbWFnZSBsYXkgYSBfX18gaGlzdG9yeSBvZiBjb3JydXB0aW9uLg==","o":["aW1taW5lbnQ=","Y29tcGxhY2VudA==","c29yZGlk","bHVtaW5vdXM="],"c":"c29yZGlk"}]},{"w":"Indignation","d":"YW5nZXIgb3IgYW5ub3lhbmNlIGNhdXNlZCBieSB1bmZhaXIgdHJlYXRtZW50","q":[{"s":"U2hlIGZpbGxlZCB3aXRoIF9fXyB3aGVuIHNoZSBoZWFyZCBob3cgdGhlIGVtcGxveWVlcyBoYWQgYmVlbiB0cmVhdGVkLg==","o":["aW5kaWduYXRpb24=","aHVicmlz","dHJlcGlkYXRpb24=","c292ZXJlaWdudHk="],"c":"aW5kaWduYXRpb24="},{"s":"SGlzIF9fXyBhdCB0aGUgdW5mYWlyIHJ1bGluZyB3YXMgdmlzaWJsZSB0byBldmVyeW9uZSBpbiB0aGUgY291cnRyb29tLg==","o":["aW50cmljYWN5","cmV0cmlidXRpb24=","aW5kaWduYXRpb24=","ZXhpbGU="],"c":"aW5kaWduYXRpb24="}]},{"w":"Retribution","d":"cHVuaXNobWVudCBnaXZlbiBpbiByZXR1cm4gZm9yIGEgd3Jvbmc7IGp1c3QgdmVuZ2VhbmNl","q":[{"s":"VGhlIHZpbGxhZ2VycyBzb3VnaHQgX19fIGZvciB0aGUgZGVzdHJ1Y3Rpb24gY2F1c2VkIGJ5IHRoZSByYWlkZXJzLg==","o":["c292ZXJlaWdudHk=","ZGVtZWFub3I=","cmV0cmlidXRpb24=","aW5kaWduYXRpb24="],"c":"cmV0cmlidXRpb24="},{"s":"SGUgYmVsaWV2ZWQgdGhlIHN0b3JtIHdhcyBkaXZpbmUgX19fIGZvciB0aGUgdG93bidzIHdpY2tlZG5lc3Mu","o":["Zm9yZWJvZGluZw==","YWxsdXNpb24=","cmV0cmlidXRpb24=","cGFyYWxsZWxpc20="],"c":"cmV0cmlidXRpb24="}]},{"w":"Treacherous","d":"YmV0cmF5aW5nIHRydXN0OyBvciwgZGFuZ2Vyb3VzIGFuZCB1bnByZWRpY3RhYmxl","q":[{"s":"VGhlIG1vdW50YWluIHBhc3MgYmVjYW1lIF9fXyBhZnRlciB0aGUgaWNlIHN0b3JtLg==","o":["dHJlYWNoZXJvdXM=","ZmxlZXRpbmc=","dmlnaWxhbnQ=","YW1wbGU="],"c":"dHJlYWNoZXJvdXM="},{"s":"SGUgd2FzIGJldHJheWVkIGJ5IGEgX19fIGZyaWVuZCBoZSBoYWQgdHJ1c3RlZCBmb3IgeWVhcnMu","o":["YWZmYWJsZQ==","bHVtaW5vdXM=","dHJlYWNoZXJvdXM=","c2FuY3RpbW9uaW91cw=="],"c":"dHJlYWNoZXJvdXM="}]},{"w":"Censure","d":"dG8gZXhwcmVzcyBzdHJvbmcsIGZvcm1hbCBkaXNhcHByb3ZhbCBvciBjcml0aWNpc20=","q":[{"s":"VGhlIHNlbmF0b3IgZmFjZWQgcHVibGljIF9fXyBmb3IgaGlzIGluYXBwcm9wcmlhdGUgY29tbWVudHMu","o":["ZXhwb3VuZA==","Y2Vuc3VyZQ==","ZW1lcmdl","dW5kdWxhdGU="],"c":"Y2Vuc3VyZQ=="},{"s":"VGhlIGNvbW1pdHRlZSB2b3RlZCB0byBmb3JtYWxseSBfX18gdGhlIG9mZmljaWFsIGZvciBtaXNjb25kdWN0Lg==","o":["ZW1lcmdl","Y2Vuc3VyZQ==","dW5kdWxhdGU=","cmVuZGVy"],"c":"Y2Vuc3VyZQ=="}]},{"w":"Edict","d":"YW4gb2ZmaWNpYWwgb3JkZXIgb3IgcHJvY2xhbWF0aW9uIGlzc3VlZCBieSBhbiBhdXRob3JpdHk=","q":[{"s":"VGhlIGtpbmcgaXNzdWVkIGFuIF9fXyBiYW5uaW5nIGFsbCBmb3JlaWduIHRyYWRlLg==","o":["ZWRpY3Q=","cmV0cmlidXRpb24=","cGFyYWxsZWxpc20=","dHJlcGlkYXRpb24="],"c":"ZWRpY3Q="},{"s":"Qnkgcm95YWwgX19fLCB0aGUgZmVzdGl2YWwgd2FzIHRvIGJlIGhlbGQgZXZlcnkgc3ByaW5nLg==","o":["YWxsdXNpb24=","ZXBpcGhhbnk=","ZWRpY3Q=","Y2Vuc3VyZQ=="],"c":"ZWRpY3Q="}]},{"w":"Fate","d":"dGhlIHByZWRldGVybWluZWQgY291cnNlIG9mIGV2ZW50czsgZGVzdGlueQ==","q":[{"s":"U2hlIGJlbGlldmVkIGl0IHdhcyBfX18gdGhhdCBicm91Z2h0IHRoZW0gdG9nZXRoZXIgYXQgdGhlIGFpcnBvcnQu","o":["Y291cA==","ZXhpbGU=","ZWRpY3Q=","ZmF0ZQ=="],"c":"ZmF0ZQ=="},{"s":"VGhlIGhlcm8gY291bGQgbm90IGVzY2FwZSB0aGUgX19fIHRoYXQgaGFkIGJlZW4gd3JpdHRlbiBmb3IgaGltLg==","o":["ZXBpc3Ryb3BoZQ==","dHJlcGlkYXRpb24=","ZmF0ZQ==","ZXVwaGVtaXNt"],"c":"ZmF0ZQ=="}]},{"w":"Hubris","d":"ZXhjZXNzaXZlIHByaWRlIG9yIHNlbGYtY29uZmlkZW5jZSB0aGF0IGxlYWRzIHRvIG9uZSdzIGRvd25mYWxs","q":[{"s":"SGlzIF9fXyBsZWQgaGltIHRvIGlnbm9yZSB0aGUgd2FybmluZ3MgYW5kIGF0dGVtcHQgdGhlIGNsaW1iIGFueXdheS4=","o":["Y291cA==","aHVicmlz","Y2Vuc3VyZQ==","ZmF0ZQ=="],"c":"aHVicmlz"},{"s":"TWFueSBHcmVlayB0cmFnZWRpZXMgY2VudGVyIG9uIGEgaGVybyBicm91Z2h0IGRvd24gYnkgaGlzIG93biBfX18u","o":["ZXBpc3Ryb3BoZQ==","bnVhbmNl","aHVicmlz","YWxsdXNpb24="],"c":"aHVicmlz"}]},{"w":"Reverence","d":"ZGVlcCByZXNwZWN0IGFuZCBhZG1pcmF0aW9uLCBvZnRlbiB3aXRoIGF3ZQ==","q":[{"s":"VGhlIHBpbGdyaW1zIGFwcHJvYWNoZWQgdGhlIHNocmluZSB3aXRoIGRlZXAgX19fLg==","o":["ZGlzZGFpbg==","cmVzb2x1dGlvbg==","cmV2ZXJlbmNl","bnVhbmNl"],"c":"cmV2ZXJlbmNl"},{"s":"U2hlIHNwb2tlIG9mIGhlciBsYXRlIG1lbnRvciB3aXRoIHF1aWV0IF9fXy4=","o":["YW5hcGhvcmE=","cmV2ZXJlbmNl","bWF4aW0=","ZmF0ZQ=="],"c":"cmV2ZXJlbmNl"}]},{"w":"Sovereignty","d":"c3VwcmVtZSBhdXRob3JpdHkgYW5kIHNlbGYtZ292ZXJuaW5nIHBvd2Vy","q":[{"s":"VGhlIHNtYWxsIG5hdGlvbiBmb3VnaHQgYSBsb25nIHdhciB0byBwcmVzZXJ2ZSBpdHMgX19fLg==","o":["YWZmbGljdGlvbg==","c292ZXJlaWdudHk=","cmVzb2x1dGlvbg==","Zm9yZWJvZGluZw=="],"c":"c292ZXJlaWdudHk="},{"s":"VGhlIHRyZWF0eSByZWNvZ25pemVkIHRoZSB0cmliZSdzIF9fXyBvdmVyIHRoZSBhbmNlc3RyYWwgbGFuZHMu","o":["c292ZXJlaWdudHk=","bnVhbmNl","ZW5taXR5","ZGlzZGFpbg=="],"c":"c292ZXJlaWdudHk="}]},{"w":"Exile","d":"dGhlIHN0YXRlIG9mIGJlaW5nIGJhcnJlZCBmcm9tIG9uZSdzIGhvbWUgY291bnRyeSBvciBjb21tdW5pdHk=","q":[{"s":"VGhlIGRldGhyb25lZCBraW5nIHdhcyBzZW50IGludG8gX19fIG9uIGEgZGlzdGFudCBpc2xhbmQu","o":["ZXhpbGU=","ZXVwaGVtaXNt","aW5kaWduYXRpb24=","ZWRpY3Q="],"c":"ZXhpbGU="},{"s":"QWZ0ZXIgeWVhcnMgb2YgX19fLCB0aGUgcG9ldCB3YXMgZmluYWxseSBhbGxvd2VkIHRvIHJldHVybiBob21lLg==","o":["ZXhpbGU=","bWF4aW0=","YW5hcGhvcmE=","YWZmbGljdGlvbg=="],"c":"ZXhpbGU="}]},{"w":"Vigilant","d":"a2VlcGluZyBjYXJlZnVsIHdhdGNoIGZvciBkYW5nZXIgb3IgZGlmZmljdWx0eTsgYWxlcnQ=","q":[{"s":"UGFyZW50cyBtdXN0IHJlbWFpbiBfX18gd2hlbiB0aGVpciBjaGlsZHJlbiBhcmUgcGxheWluZyBuZWFyIHdhdGVyLg==","o":["b2JzdGluYXRl","dmlnaWxhbnQ=","YWN1dGU=","bHVtaW5vdXM="],"c":"dmlnaWxhbnQ="},{"s":"VGhlIGd1YXJkIHN0YXllZCBfX18gdGhyb3VnaG91dCB0aGUgbG9uZyBuaWdodCBzaGlmdC4=","o":["c29yZGlk","YWxvb2Y=","dmlnaWxhbnQ=","YWN1dGU="],"c":"dmlnaWxhbnQ="}]},{"w":"Zeal","d":"Z3JlYXQgZW5lcmd5IG9yIGVudGh1c2lhc20gaW4gcHVyc3VpdCBvZiBhIGNhdXNlIG9yIGdvYWw=","q":[{"s":"U2hlIHRhY2tsZWQgaGVyIG5ldyBqb2Igd2l0aCB0aGUgX19fIG9mIHNvbWVvbmUgd2hvIGhhZCBmb3VuZCBoZXIgY2FsbGluZy4=","o":["emVhbA==","ZmF0ZQ==","Y2F0aGFyc2lz","b3h5bW9yb24="],"c":"emVhbA=="},{"s":"SGlzIF9fXyBmb3IgZW52aXJvbm1lbnRhbCBjYXVzZXMgaW5zcGlyZWQgb3RoZXJzIHRvIHZvbHVudGVlci4=","o":["b3h5bW9yb24=","ZmF0ZQ==","emVhbA==","ZGlzZGFpbg=="],"c":"emVhbA=="}]},{"w":"Provincial","d":"bmFycm93LW1pbmRlZCBvciB1bnNvcGhpc3RpY2F0ZWQ7IHJlbGF0aW5nIHRvIGEgcHJvdmluY2U=","q":[{"s":"SGlzIF9fXyBhdHRpdHVkZXMgc2VlbWVkIG91dCBvZiBwbGFjZSBpbiB0aGUgY29zbW9wb2xpdGFuIGNpdHku","o":["cHJvdmluY2lhbA==","bW9yb3Nl","Y3Vyc29yeQ==","YWZmYWJsZQ=="],"c":"cHJvdmluY2lhbA=="},{"s":"U2hlIGZvdW5kIHRoZSB0b3duIGNoYXJtaW5nIGJ1dCBhIGJpdCB0b28gX19fIGZvciBoZXIgdGFzdGUu","o":["dW5hZHVsdGVyYXRlZA==","YWN1dGU=","cHJvdmluY2lhbA==","cmVwcm9hY2hmdWw="],"c":"cHJvdmluY2lhbA=="}]},{"w":"Admonish","d":"dG8gd2FybiBvciByZXByaW1hbmQgc29tZW9uZSBnZW50bHkgYnV0IGZpcm1seQ==","q":[{"s":"VGhlIGNvYWNoIGhhZCB0byBfX18gdGhlIHRlYW0gZm9yIGFycml2aW5nIGxhdGUgdG8gcHJhY3RpY2Uu","o":["cmVuZGVy","ZW1lcmdl","YWRtb25pc2g=","ZXhwb3VuZA=="],"c":"YWRtb25pc2g="},{"s":"U2hlIHdvdWxkIGdlbnRseSBfX18gaGVyIGNoaWxkcmVuIHdoZW4gdGhleSBmb3Jnb3QgdG8gc2F5IHRoYW5rIHlvdS4=","o":["YXRvbmU=","YWRtb25pc2g=","dW5kdWxhdGU=","cmVwdWRpYXRlZA=="],"c":"YWRtb25pc2g="}]},{"w":"Complacent","d":"c2VsZi1zYXRpc2ZpZWQgdG8gdGhlIHBvaW50IG9mIGJlaW5nIHVuYXdhcmUgb2YgZGFuZ2VycyBvciBzaG9ydGNvbWluZ3M=","q":[{"s":"QWZ0ZXIgd2lubmluZyB0aGUgZmlyc3QgZmV3IGdhbWVzLCB0aGUgdGVhbSBiZWNhbWUgX19fIGFuZCBzdGFydGVkIGxvc2luZy4=","o":["Y29tcGxhY2VudA==","dHJlYWNoZXJvdXM=","bHVtaW5vdXM=","Z2xhcmluZw=="],"c":"Y29tcGxhY2VudA=="},{"s":"RG9uJ3QgZ3JvdyBfX18ganVzdCBiZWNhdXNlIHRoZSBwcm9qZWN0IGlzIGdvaW5nIHdlbGwgcmlnaHQgbm93Lg==","o":["dHJlYWNoZXJvdXM=","Y29tcGxhY2VudA==","Zm9yZWJvZGluZw==","dmlnaWxhbnQ="],"c":"Y29tcGxhY2VudA=="}]},{"w":"Concur","d":"dG8gYWdyZWUgd2l0aCBzb21lb25lIG9yIHNvbWV0aGluZw==","q":[{"s":"SSBfX18gd2l0aCBteSBjb2xsZWFndWUncyBhc3Nlc3NtZW50IG9mIHRoZSBzaXR1YXRpb24u","o":["YXRvbmU=","cmVuZGVy","YWJzb2x2ZQ==","Y29uY3Vy"],"c":"Y29uY3Vy"},{"s":"TW9zdCBleHBlcnRzIF9fXyB0aGF0IHRoZSBwb2xpY3kgbmVlZHMgdG8gYmUgcmV2aXNlZC4=","o":["Y29uY3Vy","YWRtb25pc2g=","cmVuZGVy","YXRvbmU="],"c":"Y29uY3Vy"}]},{"w":"Repudiated","d":"cmVqZWN0ZWQgb3IgcmVmdXNlZCB0byBhY2NlcHQgb3IgYmUgYXNzb2NpYXRlZCB3aXRo","q":[{"s":"VGhlIGNhbmRpZGF0ZSBwdWJsaWNseSBfX18gdGhlIGVuZG9yc2VtZW50IGFmdGVyIHRoZSBjb250cm92ZXJzeS4=","o":["Y29uY3Vy","Y2hhc3Rpc2U=","cmVuZGVy","cmVwdWRpYXRlZA=="],"c":"cmVwdWRpYXRlZA=="},{"s":"U2hlIF9fXyB0aGUgcnVtb3JzIGFib3V0IGhlciBpbnZvbHZlbWVudCBpbiB0aGUgc2NhbmRhbC4=","o":["cmVuZGVy","Y29uY3Vy","YWJzb2x2ZQ==","cmVwdWRpYXRlZA=="],"c":"cmVwdWRpYXRlZA=="}]},{"w":"Sanctimonious","d":"bWFraW5nIGEgc2hvdyBvZiBiZWluZyBtb3JhbGx5IHN1cGVyaW9yOyBwcmVhY2h5IGFuZCBoeXBvY3JpdGljYWw=","q":[{"s":"SGlzIF9fXyBsZWN0dXJlcyBhYm91dCBob25lc3R5IHJhbmcgaG9sbG93IGdpdmVuIGhpcyBvd24gYmVoYXZpb3Iu","o":["bHVtaW5vdXM=","c2FuY3RpbW9uaW91cw==","bW9yb3Nl","dml2YWNpb3Vz"],"c":"c2FuY3RpbW9uaW91cw=="},{"s":"U2hlIHJvbGxlZCBoZXIgZXllcyBhdCBoaXMgX19fIHRvbmUgd2hlbmV2ZXIgaGUgZGlzY3Vzc2VkIGV0aGljcy4=","o":["c2FuY3RpbW9uaW91cw==","YW1wbGU=","Z2xhcmluZw==","Zm9yZWJvZGluZw=="],"c":"c2FuY3RpbW9uaW91cw=="}]},{"w":"Allusion","d":"YW4gaW5kaXJlY3QgcmVmZXJlbmNlIHRvIHNvbWV0aGluZyAob2Z0ZW4gaW4gbGl0ZXJhdHVyZSk=","q":[{"s":"VGhlIG5vdmVsIGNvbnRhaW5zIGEgY2xlYXIgX19fIHRvIFNoYWtlc3BlYXJlJ3MgSGFtbGV0IGluIGl0cyBvcGVuaW5nIHNjZW5lLg==","o":["YWxsdXNpb24=","c292ZXJlaWdudHk=","bnVhbmNl","Y2Vuc3VyZQ=="],"c":"YWxsdXNpb24="},{"s":"SGVyIHNwZWVjaCBpbmNsdWRlZCBhIHN1YnRsZSBfX18gdG8gdGhlIGNpdmlsIHJpZ2h0cyBtb3ZlbWVudC4=","o":["YWxsdXNpb24=","c292ZXJlaWdudHk=","ZWRpY3Q=","Y2F0aGFyc2lz"],"c":"YWxsdXNpb24="}]},{"w":"Parallelism","d":"dGhlIHVzZSBvZiBzaW1pbGFyIGdyYW1tYXRpY2FsIHN0cnVjdHVyZXMgZm9yIGVtcGhhc2lzIG9yIHJoeXRobQ==","q":[{"s":"TGluY29sbidzIHVzZSBvZiBfX18g4oCUICJvZiB0aGUgcGVvcGxlLCBieSB0aGUgcGVvcGxlLCBmb3IgdGhlIHBlb3BsZSIg4oCUIGdpdmVzIHRoZSBwaHJhc2UgaXRzIHJoeXRobS4=","o":["aHVicmlz","ZGlzZGFpbg==","cGFyYWxsZWxpc20=","aW50cmljYWN5"],"c":"cGFyYWxsZWxpc20="},{"s":"VGhlIGF1dGhvciB1c2VzIF9fXyB0byBjcmVhdGUgYmFsYW5jZWQsIG1lbW9yYWJsZSBzZW50ZW5jZXMu","o":["aW50cmljYWN5","YWZmbGljdGlvbg==","cGFyYWxsZWxpc20=","Zm9yZWJvZGluZw=="],"c":"cGFyYWxsZWxpc20="}]},{"w":"Juxtaposition","d":"cGxhY2luZyB0d28gdGhpbmdzIGNsb3NlIHRvZ2V0aGVyIGZvciBjb250cmFzdGluZyBlZmZlY3Q=","q":[{"s":"VGhlIGZpbG0ncyBwb3dlciBjb21lcyBmcm9tIHRoZSBfX18gb2Ygd2FydGltZSBicnV0YWxpdHkgYW5kIHF1aWV0IGRvbWVzdGljIHNjZW5lcy4=","o":["Zm9yZWJvZGluZw==","ZGlzZGFpbg==","bnVhbmNl","anV4dGFwb3NpdGlvbg=="],"c":"anV4dGFwb3NpdGlvbg=="},{"s":"VGhlIGFydGlzdCB1c2VkIHRoZSBfX18gb2YgYnJpZ2h0IGNvbG9ycyBhbmQgZGFyayBzaGFkb3dzIHRvIGNyZWF0ZSB0ZW5zaW9uLg==","o":["bWF4aW0=","ZGlzZGFpbg==","anV4dGFwb3NpdGlvbg==","ZXBpcGhhbnk="],"c":"anV4dGFwb3NpdGlvbg=="}]},{"w":"Euphemism","d":"YSBtaWxkIG9yIGluZGlyZWN0IHdvcmQgdXNlZCBpbiBwbGFjZSBvZiBvbmUgY29uc2lkZXJlZCB0b28gaGFyc2ggb3IgYmx1bnQ=","q":[{"s":"IlBhc3NlZCBhd2F5IiBpcyBhIGNvbW1vbiBfX18gZm9yICJkaWVkLiI=","o":["aW1wdW5pdHk=","bWF4aW0=","ZXVwaGVtaXNt","ZXBpcGhhbnk="],"c":"ZXVwaGVtaXNt"},{"s":"VGhlIGNvbXBhbnkgdXNlZCB0aGUgX19fICJyaWdodHNpemluZyIgaW5zdGVhZCBvZiBhZG1pdHRpbmcgdGhleSB3ZXJlIGZpcmluZyBwZW9wbGUu","o":["ZXBpcGhhbnk=","ZGVtZWFub3I=","ZXVwaGVtaXNt","Y2F0aGFyc2lz"],"c":"ZXVwaGVtaXNt"}]},{"w":"Oxymoron","d":"YSBmaWd1cmUgb2Ygc3BlZWNoIGNvbWJpbmluZyB0d28gY29udHJhZGljdG9yeSB0ZXJtcw==","q":[{"s":"VGhlIHBocmFzZSAiZGVhZmVuaW5nIHNpbGVuY2UiIGlzIGEgZmFtb3VzIF9fXy4=","o":["ZXhpbGU=","b3h5bW9yb24=","Y2F0aGFyc2lz","YWZmbGljdGlvbg=="],"c":"b3h5bW9yb24="},{"s":"Q2FsbGluZyBpdCBhICJ3b3JraW5nIHZhY2F0aW9uIiBpcyBzb21ldGhpbmcgb2YgYW4gX19fLg==","o":["b3h5bW9yb24=","ZmF0ZQ==","aHVicmlz","ZW5taXR5"],"c":"b3h5bW9yb24="}]},{"w":"Anaphora","d":"dGhlIHJlcGV0aXRpb24gb2YgYSB3b3JkIG9yIHBocmFzZSBhdCB0aGUgQkVHSU5OSU5HIG9mIHN1Y2Nlc3NpdmUgY2xhdXNlcw==","q":[{"s":"RHIuIEtpbmcncyByZXBlYXRlZCAiSSBoYXZlIGEgZHJlYW0iIGlzIGEgY2xhc3NpYyBleGFtcGxlIG9mIF9fXy4=","o":["aW5kaWduYXRpb24=","cmV2ZXJlbmNl","aW50cmljYWN5","YW5hcGhvcmE="],"c":"YW5hcGhvcmE="},{"s":"VGhlIHBvZXQgdXNlZCBfX18gYnkgYmVnaW5uaW5nIGVhY2ggc3RhbnphIHdpdGggdGhlIHNhbWUgcGhyYXNlLg==","o":["c292ZXJlaWdudHk=","YW5hcGhvcmE=","cmV2ZXJlbmNl","emVhbA=="],"c":"YW5hcGhvcmE="}]},{"w":"Epistrophe","d":"dGhlIHJlcGV0aXRpb24gb2YgYSB3b3JkIG9yIHBocmFzZSBhdCB0aGUgRU5EIG9mIHN1Y2Nlc3NpdmUgY2xhdXNlcw==","q":[{"s":"TGluY29sbidzICJvZiB0aGUgcGVvcGxlLCBieSB0aGUgcGVvcGxlLCBmb3IgdGhlIHBlb3BsZSIgaXMgYW4gZXhhbXBsZSBvZiBfX18g4oCUIHJlcGV0aXRpb24gYXQgdGhlIGVuZCBvZiBjbGF1c2VzLg==","o":["ZXBpc3Ryb3BoZQ==","aW1wdW5pdHk=","cmVzb2x1dGlvbg==","aW50cmljYWN5"],"c":"ZXBpc3Ryb3BoZQ=="},{"s":"V2hlbiBlYWNoIHNlbnRlbmNlIGVuZHMgd2l0aCB0aGUgc2FtZSB3b3JkIGZvciBlbXBoYXNpcywgdGhlIHdyaXRlciBpcyB1c2luZyBfX18u","o":["dHJlcGlkYXRpb24=","ZXBpc3Ryb3BoZQ==","aW5kaWduYXRpb24=","cmV2ZXJlbmNl"],"c":"ZXBpc3Ryb3BoZQ=="}]}];
+
+// Decoder
 function d(str) {
   try { return decodeURIComponent(escape(atob(str))); }
   catch(e) { return atob(str); }
 }
 
+// =============================================
+// QUIZ STATE
+// =============================================
 let quizState = {
   questions: [],
   currentIndex: 0,
   score: 0,
-  wrongAnswers: []
+  streak: 0,
+  maxStreak: 0,
+  wrongAnswers: [],
+  earnedBadges: [],            // List of badge IDs earned this run
+  questionStartTime: 0,        // Timestamp when current question rendered
+  correctAfterWrong: 0,        // Counter for comeback badge
+  hadAWrongAnswer: false,      // Whether they've missed any yet
+  literaryWords: new Set([     // Tracking the literary device category
+    'allusion', 'parallelism', 'juxtaposition', 'euphemism',
+    'oxymoron', 'anaphora', 'epistrophe'
+  ]),
+  literaryCorrect: 0,
+  literaryAttempted: 0
 };
+
+// =============================================
+// BADGE DEFINITIONS
+// id, name, description, check function (returns true when earned)
+// =============================================
+const BADGES = [
+  {
+    id: 'first-correct',
+    name: 'FIRST CORRECT',
+    desc: 'Got your first question right — one down, many to go!',
+    check: (s, ctx) => ctx.justCorrect && s.score === 1
+  },
+  {
+    id: 'hot-streak',
+    name: 'HOT STREAK',
+    desc: '5 correct answers in a row without a miss',
+    check: (s) => s.streak >= 5
+  },
+  {
+    id: 'on-fire',
+    name: 'ON FIRE',
+    desc: '10 correct answers in a row — you are cooking',
+    check: (s) => s.streak >= 10
+  },
+  {
+    id: 'unstoppable',
+    name: 'UNSTOPPABLE',
+    desc: '15 correct in a row — nothing can stop you now',
+    check: (s) => s.streak >= 15
+  },
+  {
+    id: 'flawless',
+    name: 'FLAWLESS',
+    desc: '25 correct answers in a row — absolutely elite',
+    check: (s) => s.streak >= 25
+  },
+  {
+    id: 'speed-demon',
+    name: 'SPEED DEMON',
+    desc: 'Answered a question correctly in under 3 seconds — quick draw!',
+    check: (s, ctx) => ctx.justCorrect && ctx.answerTime < 3000
+  },
+  {
+    id: 'comeback',
+    name: 'COMEBACK KID',
+    desc: 'Got 3 right in a row after missing one — bounced back strong',
+    check: (s) => s.hadAWrongAnswer && s.correctAfterWrong >= 3
+  },
+  {
+    id: 'halfway',
+    name: 'HALFWAY THERE',
+    desc: 'Made it to question 32 — halfway through the quiz!',
+    check: (s) => s.currentIndex >= 32
+  },
+  {
+    id: 'literary-scholar',
+    name: 'LITERARY SCHOLAR',
+    desc: 'Got all 7 literary device questions right: allusion, parallelism, juxtaposition, euphemism, oxymoron, anaphora, and epistrophe',
+    check: (s) => s.literaryCorrect >= 7 && s.literaryAttempted >= 7
+  },
+  {
+    id: 'survivor',
+    name: 'SURVIVOR',
+    desc: 'Finished all 64 questions — you went the distance',
+    check: (s, ctx) => ctx.quizComplete
+  },
+  {
+    id: 'bookworm',
+    name: 'BOOKWORM',
+    desc: 'Finished with 80% or higher — strong vocabulary skills',
+    check: (s, ctx) => ctx.quizComplete && (s.score / s.questions.length) >= 0.8
+  },
+  {
+    id: 'master',
+    name: 'VOCAB MASTER',
+    desc: 'Finished with 90% or higher — you really know these words',
+    check: (s, ctx) => ctx.quizComplete && (s.score / s.questions.length) >= 0.9
+  },
+  {
+    id: 'perfect',
+    name: 'PERFECT SCORE',
+    desc: 'Got every single one of the 64 questions right — flawless victory',
+    check: (s, ctx) => ctx.quizComplete && s.score === s.questions.length
+  }
+];
 
 function shuffleArray(arr) {
   const a = [...arr];
@@ -409,21 +1631,30 @@ function matchCase(template, replacement) {
   return replacement.toLowerCase();
 }
 
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// =============================================
+// BUILD QUIZ
+// =============================================
 function buildQuiz() {
   const selected = ENCODED_BANK.map(entry => {
-    // Pick one of the question versions at random and decode it
     const versionIndex = Math.floor(Math.random() * entry.q.length);
     const q = entry.q[versionIndex];
 
     const decodedSentence = d(q.s);
     const decodedCorrect = d(q.c);
     const decodedOptions = q.o.map(o => d(o));
+    const decodedDefinition = entry.d ? d(entry.d) : '';
 
-    // Shuffle decoded options at render time (extra entropy)
     const shuffledOptions = shuffleArray(decodedOptions);
 
     return {
       word: entry.w,
+      definition: decodedDefinition,
       sentence: decodedSentence,
       options: shuffledOptions,
       correctAnswer: decodedCorrect
@@ -433,29 +1664,47 @@ function buildQuiz() {
   quizState.questions = shuffleArray(selected);
   quizState.currentIndex = 0;
   quizState.score = 0;
+  quizState.streak = 0;
+  quizState.maxStreak = 0;
   quizState.wrongAnswers = [];
+  quizState.earnedBadges = [];
+  quizState.correctAfterWrong = 0;
+  quizState.hadAWrongAnswer = false;
+  quizState.literaryCorrect = 0;
+  quizState.literaryAttempted = 0;
+
+  // Reset badge tray UI
+  renderBadgeTray();
 }
 
+// =============================================
+// START SCREEN
+// =============================================
 function renderStartScreen() {
-  document.getElementById('header-sub').textContent = `Test your knowledge — ${ENCODED_BANK.length} questions`;
-  document.getElementById('progress-text').textContent = 'Ready to begin';
+  document.getElementById('header-sub').textContent = 'READY PLAYER ONE';
+  document.getElementById('progress-text').innerHTML = '&gt; INSERT COIN TO BEGIN';
   document.getElementById('progress-fill').style.width = '0%';
+
+  // Reset badge tray to empty state
+  quizState.earnedBadges = [];
+  renderBadgeTray();
 
   document.getElementById('content').innerHTML = `
     <div class="start-screen">
-      <h2>Ready to test your vocabulary?</h2>
-      <p>You'll get one question per word — fill in the blank with the best answer.<br>Questions and answer order are randomized each time.</p>
+      <svg class="hero-art" aria-hidden="true"><use href="#art-floppy"/></svg>
+      <h2>TEST YOUR VOCAB SKILLS</h2>
+      <div class="tagline">One word per question. Pick wisely.</div>
       <div class="stat-row">
         <div class="stat">
           <div class="stat-number">${ENCODED_BANK.length}</div>
-          <div class="stat-label">Questions</div>
+          <div class="stat-label">WORDS</div>
         </div>
         <div class="stat">
           <div class="stat-number">4</div>
-          <div class="stat-label">Choices each</div>
+          <div class="stat-label">CHOICES</div>
         </div>
       </div>
-      <button class="restart-btn" onclick="startQuiz()">Start Quiz</button>
+      <button class="start-btn" onclick="startQuiz()">▶ PRESS START</button>
     </div>
   `;
 }
@@ -465,16 +1714,32 @@ function startQuiz() {
   renderQuestion();
 }
 
+// =============================================
+// RENDER QUESTION
+// =============================================
 function renderQuestion() {
   const q = quizState.questions[quizState.currentIndex];
-  const progress = ((quizState.currentIndex) / quizState.questions.length) * 100;
+  const total = quizState.questions.length;
+  const progress = (quizState.currentIndex / total) * 100;
+
   document.getElementById('progress-fill').style.width = progress + '%';
-  document.getElementById('progress-text').textContent =
-    `Question ${quizState.currentIndex + 1} of ${quizState.questions.length}`;
-  document.getElementById('header-sub').textContent =
-    `Score: ${quizState.score} / ${quizState.currentIndex}`;
+  document.getElementById('progress-text').innerHTML =
+    `&gt; QUESTION ${quizState.currentIndex + 1} / ${total}`;
+
+  const streakBadge = quizState.streak >= 3
+    ? `<span class="combo-badge">🔥 ${quizState.streak} COMBO</span>`
+    : '';
+
+  document.getElementById('header-sub').innerHTML =
+    `SCORE: ${quizState.score} / ${quizState.currentIndex}${streakBadge}`;
 
   const container = document.createElement('div');
+  container.className = 'question-area';
+
+  const qNum = document.createElement('div');
+  qNum.className = 'q-number';
+  qNum.textContent = `▸ Question ${quizState.currentIndex + 1}`;
+  container.appendChild(qNum);
 
   const sentenceDiv = document.createElement('div');
   sentenceDiv.className = 'question';
@@ -499,10 +1764,9 @@ function renderQuestion() {
 
     btn.appendChild(letterSpan);
     btn.appendChild(textSpan);
-
-    // Attach the actual option value via a closure, not as a DOM attribute,
-    // so it doesn't appear in the rendered HTML
     btn.addEventListener('click', () => selectAnswer(btn, opt));
+    // Blur on touchend to clear sticky :hover/:focus on mobile (iOS Safari)
+    btn.addEventListener('touchend', () => btn.blur());
 
     optionsDiv.appendChild(btn);
   });
@@ -512,27 +1776,64 @@ function renderQuestion() {
   const content = document.getElementById('content');
   content.innerHTML = '';
   content.appendChild(container);
+
+  // Record the start time for speed-demon badge tracking
+  quizState.questionStartTime = Date.now();
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
+// =============================================
+// SELECT ANSWER + CELEBRATION/FEEDBACK
+// =============================================
 function selectAnswer(button, selectedOption) {
   const q = quizState.questions[quizState.currentIndex];
   const allButtons = document.querySelectorAll('.option');
   allButtons.forEach(b => b.disabled = true);
 
   const isCorrect = selectedOption.toLowerCase() === q.correctAnswer.toLowerCase();
+  const answerTime = Date.now() - quizState.questionStartTime;
+  const wordLower = q.correctAnswer.toLowerCase();
+  const isLiterary = quizState.literaryWords.has(wordLower);
+
+  if (isLiterary) {
+    quizState.literaryAttempted++;
+  }
 
   if (isCorrect) {
     button.classList.add('correct');
     quizState.score++;
+    quizState.streak++;
+    if (quizState.streak > quizState.maxStreak) quizState.maxStreak = quizState.streak;
+
+    if (quizState.hadAWrongAnswer) {
+      quizState.correctAfterWrong++;
+    }
+    if (isLiterary) {
+      quizState.literaryCorrect++;
+    }
+
+    // CELEBRATE
+    fireConfetti();
+    flashScreen(false);
+    showReaction(true);
+
+    // Check for newly earned badges
+    checkBadges({ justCorrect: true, answerTime });
+
+    setTimeout(() => advanceQuestion(), 1300);
   } else {
     button.classList.add('wrong');
-    // Highlight the correct answer by matching its text content
+    quizState.streak = 0;
+    quizState.correctAfterWrong = 0;
+    quizState.hadAWrongAnswer = true;
+
+    // SHAKE + FLASH
+    const card = document.getElementById('card');
+    card.classList.add('shake');
+    setTimeout(() => card.classList.remove('shake'), 500);
+    flashScreen(true);
+    showReaction(false);
+
+    // Highlight correct answer
     const correctDisplay = matchCase(q.correctAnswer, q.correctAnswer);
     allButtons.forEach(b => {
       const text = b.querySelector('.option-text').textContent;
@@ -540,39 +1841,248 @@ function selectAnswer(button, selectedOption) {
         b.classList.add('correct');
       }
     });
+
     quizState.wrongAnswers.push({
       word: q.word,
+      definition: q.definition,
       sentence: q.sentence,
       yourAnswer: matchCase(q.correctAnswer, selectedOption),
       correctAnswer: matchCase(q.correctAnswer, q.correctAnswer)
     });
-  }
 
-  setTimeout(() => {
-    quizState.currentIndex++;
-    if (quizState.currentIndex >= quizState.questions.length) {
-      renderResults();
-    } else {
-      renderQuestion();
-    }
-  }, isCorrect ? 700 : 1400);
+    showDefinitionPanel(q);
+  }
 }
 
+function advanceQuestion() {
+  quizState.currentIndex++;
+
+  // Check badges that depend on question index (e.g., halfway)
+  checkBadges({ justCorrect: false });
+
+  if (quizState.currentIndex >= quizState.questions.length) {
+    renderResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+// =============================================
+// BADGE SYSTEM
+// =============================================
+function checkBadges(ctx) {
+  ctx = ctx || {};
+  const newlyEarned = [];
+  BADGES.forEach(badge => {
+    if (quizState.earnedBadges.includes(badge.id)) return;
+    if (badge.check(quizState, ctx)) {
+      quizState.earnedBadges.push(badge.id);
+      newlyEarned.push(badge);
+    }
+  });
+
+  if (newlyEarned.length > 0) {
+    renderBadgeTray();
+    // Stagger the notifications if multiple badges earned at once.
+    // Account for longer descriptions taking more time on screen.
+    let cumulativeDelay = 0;
+    newlyEarned.forEach((badge) => {
+      const thisDelay = cumulativeDelay;
+      setTimeout(() => showBadgeNotification(badge), thisDelay);
+      cumulativeDelay += (badge.desc.length > 60) ? 4200 : 2400;
+    });
+  }
+}
+
+function renderBadgeTray() {
+  const tray = document.getElementById('badge-tray');
+  const empty = document.getElementById('badge-tray-empty');
+
+  if (quizState.earnedBadges.length === 0) {
+    empty.style.display = 'inline';
+    // Remove all existing badge icons
+    tray.querySelectorAll('.badge-icon').forEach(el => el.remove());
+    return;
+  }
+
+  empty.style.display = 'none';
+
+  // Add any badges not yet in the tray
+  quizState.earnedBadges.forEach(id => {
+    if (tray.querySelector(`.badge-icon[data-id="${id}"]`)) return; // already shown
+    const badge = BADGES.find(b => b.id === id);
+    if (!badge) return;
+
+    const el = document.createElement('div');
+    el.className = 'badge-icon';
+    el.dataset.id = id;
+    el.dataset.name = badge.name;
+    el.title = badge.name + ' — ' + badge.desc;
+    el.innerHTML = `<svg viewBox="0 0 32 32"><use href="#badge-${id}"/></svg>`;
+    tray.appendChild(el);
+  });
+
+  // Auto-scroll to the latest badge on mobile
+  tray.scrollLeft = tray.scrollWidth;
+}
+
+function showBadgeNotification(badge) {
+  const notif = document.createElement('div');
+  notif.className = 'badge-notification';
+  // Longer descriptions get a longer display time so they can be read
+  const isLongDesc = badge.desc.length > 60;
+  if (isLongDesc) notif.classList.add('long-desc');
+
+  notif.innerHTML = `
+    <div class="unlock-label">★ BADGE UNLOCKED ★</div>
+    <div class="unlock-icon">
+      <svg viewBox="0 0 32 32" width="100%" height="100%"><use href="#badge-${badge.id}"/></svg>
+    </div>
+    <div class="unlock-name">${badge.name}</div>
+    <div class="unlock-desc">${badge.desc}</div>
+  `;
+  document.body.appendChild(notif);
+
+  // Extra confetti for badge unlock
+  fireConfetti();
+
+  // Remove after animation completes (2.4s normal, 4.2s for long descriptions)
+  const duration = isLongDesc ? 4200 : 2400;
+  setTimeout(() => notif.remove(), duration);
+}
+
+// =============================================
+// CONFETTI
+// =============================================
+function fireConfetti() {
+  const layer = document.createElement('div');
+  layer.className = 'confetti-layer';
+  document.body.appendChild(layer);
+
+  const colors = ['#ff2e93', '#00f0ff', '#ffd60a', '#39ff14', '#ff8c00', '#ffffff'];
+  const count = 60;
+
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = (Math.random() * 100) + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = (Math.random() * 0.3) + 's';
+    piece.style.animationDuration = (1 + Math.random() * 0.8) + 's';
+    // Vary shape: some squares, some rectangles
+    if (Math.random() > 0.5) {
+      piece.style.width = '8px';
+      piece.style.height = '8px';
+    }
+    if (Math.random() > 0.7) {
+      piece.style.borderRadius = '50%';
+    }
+    layer.appendChild(piece);
+  }
+
+  setTimeout(() => layer.remove(), 2400);
+}
+
+// =============================================
+// SCREEN FLASH
+// =============================================
+function flashScreen(isWrong) {
+  const flash = document.createElement('div');
+  flash.className = 'flash-overlay' + (isWrong ? ' wrong' : '');
+  document.body.appendChild(flash);
+  setTimeout(() => flash.remove(), 700);
+}
+
+// =============================================
+// REACTION POPUP (thumbs-up kid or sad plant)
+// =============================================
+function showReaction(isCorrect) {
+  const popup = document.createElement('div');
+  popup.className = 'reaction-popup';
+
+  const messages = isCorrect
+    ? ['NICE!', 'YES!', 'BOOM!', 'GENIUS!', 'CORRECT!', 'EPIC!', '+1 SMART']
+    : ['OOF!', 'NOPE!', 'TRY AGAIN!', 'YIKES!', 'CLOSE!', 'WHIFF!'];
+  const msg = messages[Math.floor(Math.random() * messages.length)];
+
+  const svgId = isCorrect ? 'art-thumbsup-kid' : 'art-sad-plant';
+
+  popup.innerHTML = `
+    <svg viewBox="0 0 80 80"><use href="#${svgId}"/></svg>
+    <div class="reaction-text${isCorrect ? '' : ' wrong-text'}">${msg}</div>
+  `;
+
+  document.body.appendChild(popup);
+  setTimeout(() => popup.remove(), 1200);
+}
+
+// =============================================
+// DEFINITION PANEL (shown after wrong answer)
+// =============================================
+function showDefinitionPanel(q) {
+  const correctDisplay = matchCase(q.correctAnswer, q.correctAnswer);
+  const panel = document.createElement('div');
+  panel.className = 'definition-panel';
+
+  panel.innerHTML = `
+    <svg class="panel-art" viewBox="0 0 80 80" aria-hidden="true">
+      <use href="#art-sad-plant"/>
+    </svg>
+    <div class="panel-body">
+      <div class="definition-word">${correctDisplay}</div>
+      <div class="definition-text">${escapeHtml(q.definition)}</div>
+      <button class="next-btn" id="next-q-btn">NEXT QUESTION ▶</button>
+    </div>
+  `;
+
+  document.getElementById('content').appendChild(panel);
+
+  // Wire up the next button
+  document.getElementById('next-q-btn').addEventListener('click', advanceQuestion);
+  document.getElementById('next-q-btn').addEventListener('touchend', function() {
+    this.blur();
+  });
+
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// =============================================
+// RESULTS SCREEN
+// =============================================
 function renderResults() {
   const total = quizState.questions.length;
   const score = quizState.score;
   const percent = Math.round((score / total) * 100);
 
-  document.getElementById('progress-fill').style.width = '100%';
-  document.getElementById('progress-text').textContent = 'Quiz complete!';
-  document.getElementById('header-sub').textContent = `Final score: ${score} / ${total}`;
+  // Check end-of-quiz badges (survivor, bookworm, master, perfect)
+  checkBadges({ justCorrect: false, quizComplete: true });
 
-  let grade, message;
-  if (percent >= 90) { grade = 'Excellent! 🌟'; message = 'Outstanding command of vocabulary.'; }
-  else if (percent >= 80) { grade = 'Great Job! 👏'; message = 'Strong performance — just a few to review.'; }
-  else if (percent >= 70) { grade = 'Good Work! 👍'; message = 'Solid understanding with some room to grow.'; }
-  else if (percent >= 60) { grade = 'Keep Practicing! 💪'; message = "You're getting there — review and try again."; }
-  else { grade = 'Time to Study! 📖'; message = 'Review the missed words and give it another go.'; }
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-text').innerHTML = '&gt; GAME OVER';
+  document.getElementById('header-sub').textContent = `FINAL: ${score} / ${total}`;
+
+  let grade, message, artId;
+  if (percent >= 90) {
+    grade = 'HIGH SCORE!';
+    message = 'Outstanding command of the vocabulary.';
+    artId = 'art-trophy';
+  } else if (percent >= 80) {
+    grade = 'GREAT JOB!';
+    message = 'Strong performance — just a few to review.';
+    artId = 'art-trophy';
+  } else if (percent >= 70) {
+    grade = 'NICE WORK!';
+    message = 'Solid understanding. A bit more practice and you\'ve got it.';
+    artId = 'art-thumbsup-kid';
+  } else if (percent >= 60) {
+    grade = 'KEEP GOING!';
+    message = 'Getting there — review the missed words and try again.';
+    artId = 'art-thumbsup-kid';
+  } else {
+    grade = 'STUDY TIME!';
+    message = 'Hit the books and come back for round two.';
+    artId = 'art-sad-plant';
+  }
 
   const content = document.getElementById('content');
   content.innerHTML = '';
@@ -581,24 +2091,56 @@ function renderResults() {
   wrapper.className = 'results';
 
   wrapper.innerHTML = `
-    <div class="score-circle">
+    <svg class="results-art" viewBox="0 0 80 80" aria-hidden="true"><use href="#${artId}"/></svg>
+    <div class="score-display">
       <div class="score-percent">${percent}%</div>
-      <div class="score-fraction">${score} / ${total}</div>
+      <div class="score-fraction">${score} of ${total} correct</div>
     </div>
     <div class="grade-label">${grade}</div>
     <div class="grade-message">${message}</div>
+    ${quizState.maxStreak >= 5 ? `<div class="grade-message" style="color: var(--neon-pink); font-weight: 600;">🔥 Best streak: ${quizState.maxStreak} in a row!</div>` : ''}
   `;
 
   if (quizState.wrongAnswers.length === 0) {
     const perfect = document.createElement('div');
     perfect.className = 'perfect-message';
-    perfect.textContent = '🎉 Perfect score! Every answer was correct.';
+    perfect.textContent = '🎉 PERFECT SCORE! FLAWLESS VICTORY 🎉';
     wrapper.appendChild(perfect);
-  } else {
+    // Big celebration for perfect score
+    setTimeout(() => fireConfetti(), 200);
+    setTimeout(() => fireConfetti(), 600);
+    setTimeout(() => fireConfetti(), 1000);
+  }
+
+  // Show badges earned summary (if any)
+  if (quizState.earnedBadges.length > 0) {
+    const badgeSummary = document.createElement('div');
+    badgeSummary.className = 'badge-summary';
+    let badgeHtml = `<h3>▸ ${quizState.earnedBadges.length} BADGE${quizState.earnedBadges.length === 1 ? '' : 'S'} EARNED</h3><div class="badge-summary-grid">`;
+    quizState.earnedBadges.forEach(id => {
+      const badge = BADGES.find(b => b.id === id);
+      if (!badge) return;
+      badgeHtml += `
+        <div class="badge-summary-item">
+          <div class="badge-summary-icon">
+            <svg viewBox="0 0 32 32"><use href="#badge-${id}"/></svg>
+          </div>
+          <div class="badge-summary-text">
+            <div class="badge-summary-name">${badge.name}</div>
+            <div class="badge-summary-desc">${badge.desc}</div>
+          </div>
+        </div>`;
+    });
+    badgeHtml += '</div>';
+    badgeSummary.innerHTML = badgeHtml;
+    wrapper.appendChild(badgeSummary);
+  }
+
+  if (quizState.wrongAnswers.length > 0) {
     const review = document.createElement('div');
     review.className = 'review-section';
     const h3 = document.createElement('h3');
-    h3.textContent = `Review missed questions (${quizState.wrongAnswers.length})`;
+    h3.textContent = `▸ REVIEW: ${quizState.wrongAnswers.length} MISSED`;
     review.appendChild(h3);
 
     quizState.wrongAnswers.forEach(w => {
@@ -620,13 +2162,25 @@ function renderResults() {
 
       const correctAns = document.createElement('div');
       correctAns.className = 'review-answer correct-answer';
-      correctAns.innerHTML = '<span class="label">Correct answer:</span>';
+      correctAns.innerHTML = '<span class="label">Correct:</span>';
       correctAns.appendChild(document.createTextNode(w.correctAnswer));
 
       item.appendChild(wordTag);
       item.appendChild(qText);
       item.appendChild(yourAns);
       item.appendChild(correctAns);
+
+      if (w.definition) {
+        const defLine = document.createElement('div');
+        defLine.className = 'review-definition';
+        const defLabel = document.createElement('span');
+        defLabel.className = 'label';
+        defLabel.textContent = 'Means:';
+        defLine.appendChild(defLabel);
+        defLine.appendChild(document.createTextNode(' ' + w.definition));
+        item.appendChild(defLine);
+      }
+
       review.appendChild(item);
     });
 
@@ -634,14 +2188,18 @@ function renderResults() {
   }
 
   const restart = document.createElement('button');
-  restart.className = 'restart-btn';
-  restart.textContent = 'Try Again with New Questions';
+  restart.className = 'start-btn';
+  restart.textContent = '▶ PLAY AGAIN';
   restart.onclick = startQuiz;
+  restart.addEventListener('touchend', function() { this.blur(); });
   wrapper.appendChild(restart);
 
   content.appendChild(wrapper);
 }
 
+// =============================================
+// INIT
+// =============================================
 renderStartScreen();
 </script>
 
